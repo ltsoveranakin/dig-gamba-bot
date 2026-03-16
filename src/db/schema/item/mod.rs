@@ -12,8 +12,8 @@ use surrealdb::types::{RecordId, SurrealValue};
 pub(crate) static ITEM_GENERATOR: LazyLock<ItemGenerator> = LazyLock::new(|| ItemGenerator::new());
 
 const RARITY_POW: f64 = 2.0;
-const MAX_RARITY_ADDITIONAL_VALUE: f64 = 1000.0;
-const ITEM_TABLE: &str = "item";
+const MAX_RARITY_ADDITIONAL_MUL: f64 = 100.0;
+pub(crate) const ITEM_TABLE: &str = "item";
 
 pub(crate) trait ItemValue {
     fn get_item_value(&self) -> u64;
@@ -39,8 +39,8 @@ impl Display for Item {
 impl ItemValue for Item {
     fn get_item_value(&self) -> u64 {
         match self {
-            Self::Garbage => 10,
-            Self::OldCoin => 100,
+            Self::Garbage => 5,
+            Self::OldCoin => 8,
         }
     }
 }
@@ -52,13 +52,14 @@ pub(crate) struct InventoryItem {
     /// The higher the rarity, the more the item is worth
     pub(crate) rarity: f64,
     pub(crate) owner: RecordId,
+    pub(crate) id: Option<RecordId>,
 }
 
 impl ItemValue for InventoryItem {
     fn get_item_value(&self) -> u64 {
         let base_item_value = self.item_type.get_item_value();
 
-        let rarity_mul = self.rarity * MAX_RARITY_ADDITIONAL_VALUE;
+        let rarity_mul = self.rarity * MAX_RARITY_ADDITIONAL_MUL;
 
         let item_value = base_item_value + (base_item_value * (rarity_mul as u64));
 
@@ -85,6 +86,7 @@ impl InventoryItem {
                 item_type,
                 rarity,
                 owner,
+                id: None,
             })
             .await?;
 
