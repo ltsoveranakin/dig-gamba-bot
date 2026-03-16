@@ -2,7 +2,7 @@ mod commands;
 mod db;
 mod handler;
 
-use crate::commands::{add, balance, create, dig, inventory, sell};
+use crate::commands::COMMAND_LIST;
 use anyhow::Context;
 
 use poise::serenity_prelude::*;
@@ -22,7 +22,11 @@ async fn main() -> anyhow::Result<()> {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![add(), balance(), create(), dig(), inventory(), sell()],
+            commands: COMMAND_LIST
+                .write()
+                .expect("RWLock not poisoned")
+                .take()
+                .expect("Command list initialized"),
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
