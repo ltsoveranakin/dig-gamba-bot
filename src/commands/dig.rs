@@ -1,6 +1,6 @@
 use crate::commands::{default_embed, CommandContext, DigCommandError};
 use crate::db::schema::item::rarity::Rarity;
-use crate::db::schema::item::InventoryItem;
+use crate::db::schema::item::schema::InventoryItem;
 use poise::CreateReply;
 
 #[poise::command(slash_command)]

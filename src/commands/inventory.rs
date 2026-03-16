@@ -1,6 +1,7 @@
 use crate::commands::{default_embed, CommandContext, DigCommandError};
 use crate::db::schema::item::rarity::Rarity;
-use crate::db::schema::item::{InventoryItem, ItemValue, ITEM_TABLE};
+use crate::db::schema::item::schema::InventoryItem;
+use crate::db::schema::item::{ItemValue, ITEM_TABLE};
 use crate::db::schema::users::{UserData, USER_TABLE};
 use poise::CreateReply;
 use serenity::all::*;

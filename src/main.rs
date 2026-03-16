@@ -1,6 +1,5 @@
 mod commands;
 mod db;
-mod handler;
 
 use crate::commands::COMMAND_LIST;
 use anyhow::Context;
