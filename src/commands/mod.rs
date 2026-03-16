@@ -1,4 +1,4 @@
-use crate::db::schema::UserData;
+use crate::db::schema::{InventoryItem, UserData};
 use crate::Data;
 
 pub(crate) type CommandContext<'a> = poise::Context<'a, Data, DigCommandError>;
@@ -33,6 +33,19 @@ pub(super) async fn create(ctx: CommandContext<'_>) -> Result<(), DigCommandErro
     ctx.reply(format!(
         "Your user profile has been created! Your starting balance is: {}",
         user.balance
+    ))
+    .await?;
+
+    Ok(())
+}
+
+#[poise::command(slash_command)]
+pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
+    let item = InventoryItem::create_new(&ctx).await?;
+
+    ctx.say(format!(
+        "After some digging you found some {}!",
+        item.item_type
     ))
     .await?;
 

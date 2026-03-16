@@ -39,8 +39,6 @@ impl UserData {
             if let Some(user) = user {
                 Ok(user)
             } else {
-                // let r = format!("");
-
                 ctx.reply("User profile not yet created, please setup your user with /create")
                     .await?;
 
@@ -65,7 +63,7 @@ impl UserData {
         Ok(user.unwrap())
     }
 
-    fn user_resource(ctx: &CommandContext) -> (&'static str, String) {
+    pub(crate) fn user_resource(ctx: &CommandContext) -> (&'static str, String) {
         (USER_TABLE, ctx.author().id.get().to_string())
     }
 }

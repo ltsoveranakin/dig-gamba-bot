@@ -2,14 +2,12 @@ mod commands;
 mod db;
 mod handler;
 
-use crate::commands::{add, balance, create};
+use crate::commands::{add, balance, create, dig};
 use anyhow::Context;
 
-// use mongodb::Collection;
 use poise::serenity_prelude::*;
 use surrealdb::engine::local::SurrealKv;
 use surrealdb::Surreal;
-
 // pub(crate) struct CollectionsData {
 //     users: Collection<UserSchema>,
 // }
@@ -24,7 +22,7 @@ async fn main() -> anyhow::Result<()> {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![add(), balance(), create()],
+            commands: vec![add(), balance(), create(), dig()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
