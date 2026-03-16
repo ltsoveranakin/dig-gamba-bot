@@ -1,0 +1,15 @@
+[package]
+name = "dig-gamba-bot"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.102"
+#mongodb = "3.5.1"
+bincode = "2.0.0-rc.3"
+poise = "0.6.1"
+serde = "1.0"
+serenity = { version = "0.12.5", features = ["builder", "client", "gateway", "model", "utils", "collector", "framework"] }
+surrealdb = { version = "3.0.4", features = ["kv-surrealkv", "kv-mem"] }
+tokio = { version = "1.50.0", features = ["macros", "rt-multi-thread"] }
+
