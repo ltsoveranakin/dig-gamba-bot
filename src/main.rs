@@ -2,7 +2,7 @@ mod commands;
 mod db;
 mod handler;
 
-use crate::commands::{add, balance, create, dig};
+use crate::commands::{add, balance, create, dig, inventory, sell};
 use anyhow::Context;
 
 use poise::serenity_prelude::*;
@@ -22,7 +22,7 @@ async fn main() -> anyhow::Result<()> {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![add(), balance(), create(), dig()],
+            commands: vec![add(), balance(), create(), dig(), inventory(), sell()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {

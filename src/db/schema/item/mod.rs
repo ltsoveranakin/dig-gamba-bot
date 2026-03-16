@@ -1,5 +1,7 @@
+pub(crate) mod rarity;
+
 use crate::commands::{CommandContext, DigCommandError};
-use crate::db::schema::UserData;
+use crate::db::schema::users::{UserData, USER_TABLE};
 use rand::distr::weighted::WeightedIndex;
 use rand::prelude::{Distribution, SmallRng};
 use rand::{make_rng, RngExt};
@@ -9,9 +11,10 @@ use surrealdb::types::{RecordId, SurrealValue};
 
 pub(crate) static ITEM_GENERATOR: LazyLock<ItemGenerator> = LazyLock::new(|| ItemGenerator::new());
 
+const RARITY_POW: f64 = 2.0;
 const MAX_RARITY_ADDITIONAL_VALUE: f64 = 1000.0;
 const ITEM_TABLE: &str = "item";
-const RARITY_POW: f64 = 100.0;
+
 pub(crate) trait ItemValue {
     fn get_item_value(&self) -> u64;
 }
@@ -26,7 +29,6 @@ impl Display for Item {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let s = match self {
             Self::Garbage => "Garbage",
-
             Self::OldCoin => "Old Coin",
         };
 
@@ -73,7 +75,7 @@ impl InventoryItem {
         let rarity_lin: f64 = ITEM_GENERATOR.rng_mut().random_range(0.0..1.0);
         let rarity = rarity_lin.powf(RARITY_POW);
 
-        let owner = RecordId::new(ITEM_TABLE, ctx.author().id.get().to_string());
+        let owner = RecordId::new(USER_TABLE, ctx.author().id.get().to_string());
 
         let item = ctx
             .data()

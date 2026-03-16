@@ -4,7 +4,7 @@ use std::error::Error;
 use std::fmt::{Display, Formatter};
 use surrealdb::types::SurrealValue;
 
-const USER_TABLE: &str = "user";
+pub(crate) const USER_TABLE: &str = "user";
 
 #[derive(SurrealValue, Debug)]
 pub(crate) struct UserData {
