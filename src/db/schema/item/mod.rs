@@ -2,21 +2,26 @@ pub(crate) mod generator;
 pub(crate) mod rarity;
 pub(crate) mod schema;
 
+use derive_enum_all_values::AllValues;
 use std::fmt::{Display, Formatter};
 use surrealdb::types::SurrealValue;
 
-const RARITY_POW: f64 = 2.0;
-const MAX_RARITY_ADDITIONAL_MUL: f64 = 100.0;
+const RARITY_POW: f64 = 2.5;
+const MAX_RARITY_ADDITIONAL_MUL: f64 = 10.0;
 pub(crate) const ITEM_TABLE: &str = "item";
 
 pub(crate) trait ItemValue {
     fn get_item_value(&self) -> u64;
 }
 
-#[derive(SurrealValue, Copy, Clone)]
+#[derive(SurrealValue, AllValues, Copy, Clone)]
 pub(crate) enum Item {
     Garbage,
     OldCoin,
+    BrokenTool,
+    Diamond,
+    Ruby,
+    MetalScraps,
 }
 
 impl Display for Item {
@@ -24,6 +29,10 @@ impl Display for Item {
         let s = match self {
             Self::Garbage => "Garbage",
             Self::OldCoin => "Old Coin",
+            Self::BrokenTool => "Broken Tool",
+            Self::Diamond => "Diamond",
+            Self::Ruby => "Ruby",
+            Self::MetalScraps => "Metal Scraps",
         };
 
         f.write_str(s)
@@ -33,8 +42,36 @@ impl Display for Item {
 impl ItemValue for Item {
     fn get_item_value(&self) -> u64 {
         match self {
-            Self::Garbage => 5,
+            Self::Garbage => 3,
             Self::OldCoin => 8,
+            Self::BrokenTool => 20,
+            Self::Diamond => 85,
+            Self::Ruby => 80,
+            Self::MetalScraps => 5,
+        }
+    }
+}
+
+impl Item {
+    fn get_drop_weight(&self) -> usize {
+        match self {
+            Self::Garbage => 20,
+            Self::OldCoin => 8,
+            Self::BrokenTool => 3,
+            Self::Diamond => 1,
+            Self::Ruby => 1,
+            Self::MetalScraps => 8,
+        }
+    }
+
+    fn get_item_description(&self) -> &str {
+        match self {
+            Self::Garbage => "Some garbage left behind",
+            Self::OldCoin => "An old coin, dulled from its age",
+            Self::BrokenTool => "A once working tool, now left in pieces",
+            Self::Diamond => "A shiny diamond",
+            Self::Ruby => "A beautifully vibrant red ruby",
+            Self::MetalScraps => "Some metal scraps, a bit more useful than garbage at least",
         }
     }
 }
