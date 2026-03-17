@@ -64,7 +64,7 @@ impl Item {
         }
     }
 
-    fn get_description(&self) -> &str {
+    pub(crate) fn get_description(&self) -> &str {
         match self {
             Self::Garbage => "Some garbage left behind",
             Self::OldCoin => "An old coin, dulled from its age",
@@ -75,9 +75,21 @@ impl Item {
         }
     }
 
-    fn get_image_link(&self) -> &str {
+    fn get_asset_name(&self) -> &str {
         match self {
-            _ => "",
+            Self::Garbage => "garbage",
+            _ => "missing_texture",
         }
+    }
+
+    pub(crate) fn is_multiple(&self) -> bool {
+        match self {
+            Self::Garbage | Self::MetalScraps => true,
+            Self::Ruby | Self::Diamond | Self::BrokenTool | Self::OldCoin => false,
+        }
+    }
+
+    pub(crate) fn get_asset_file_name(&self) -> String {
+        format!("{}.png", self.get_asset_name())
     }
 }

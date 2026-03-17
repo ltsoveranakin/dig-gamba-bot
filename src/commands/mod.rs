@@ -11,7 +11,7 @@ use crate::commands::inventory::inventory;
 use crate::commands::sell::sell;
 use crate::Data;
 use poise::CreateReply;
-use serenity::all::CreateEmbed;
+use serenity::all::{Color, CreateEmbed};
 use std::sync::{LazyLock, RwLock};
 
 pub(crate) type CommandContext<'a> = poise::Context<'a, Data, DigCommandError>;
@@ -28,7 +28,9 @@ pub(super) static COMMAND_LIST: LazyLock<
 });
 
 pub(super) fn default_embed() -> CreateEmbed {
-    CreateEmbed::default().title("Dig Bot")
+    CreateEmbed::default()
+        .title("/DIG")
+        .color(Color::from_rgb(112, 50, 2))
 }
 
 fn default_reply(message: impl Into<String>) -> CreateReply {

@@ -40,6 +40,13 @@ impl Rarity {
             _ => Self::Perfect,
         }
     }
+
+    pub(crate) fn starts_with_vowel(&self) -> bool {
+        match self {
+            Self::Uncommon | Self::Epic => true,
+            Self::Common | Self::Rare | Self::Legendary | Self::Perfect => false,
+        }
+    }
 }
 
 impl Display for Rarity {

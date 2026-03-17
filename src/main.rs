@@ -3,16 +3,17 @@ mod db;
 
 use crate::commands::COMMAND_LIST;
 use anyhow::Context;
+use std::sync::Mutex;
 
 use poise::serenity_prelude::*;
+use rand::make_rng;
+use rand::prelude::SmallRng;
 use surrealdb::engine::local::SurrealKv;
 use surrealdb::Surreal;
-// pub(crate) struct CollectionsData {
-//     users: Collection<UserSchema>,
-// }
 
 pub(crate) struct Data {
     pub(crate) db: Surreal<surrealdb::engine::local::Db>,
+    pub(crate) rng: Mutex<SmallRng>,
 }
 
 #[tokio::main]
@@ -40,7 +41,9 @@ async fn main() -> anyhow::Result<()> {
 
                 println!("Db set up");
 
-                Ok(Data { db })
+                let rng = Mutex::new(make_rng());
+
+                Ok(Data { db, rng })
             })
         })
         .build();
@@ -51,6 +54,8 @@ async fn main() -> anyhow::Result<()> {
         .framework(framework)
         .await
         .context("Failed to create client")?;
+
+    println!("Client created, starting connection");
 
     client.start().await?;
 
