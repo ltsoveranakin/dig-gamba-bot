@@ -64,7 +64,7 @@ impl Item {
         }
     }
 
-    fn get_item_description(&self) -> &str {
+    fn get_description(&self) -> &str {
         match self {
             Self::Garbage => "Some garbage left behind",
             Self::OldCoin => "An old coin, dulled from its age",
@@ -72,6 +72,12 @@ impl Item {
             Self::Diamond => "A shiny diamond",
             Self::Ruby => "A beautifully vibrant red ruby",
             Self::MetalScraps => "Some metal scraps, a bit more useful than garbage at least",
+        }
+    }
+
+    fn get_image_link(&self) -> &str {
+        match self {
+            _ => "",
         }
     }
 }
