@@ -21,7 +21,7 @@ impl Rarity {
     pub(crate) fn get_rarity_color(&self) -> Color {
         match self {
             Self::Common => Color::from_rgb(102, 102, 102),
-            Self::Uncommon => Color::from_rgb(98, 117, 48),
+            Self::Uncommon => Color::from_rgb(35, 166, 8),
             Self::Rare => Color::from_rgb(6, 49, 71),
             Self::Epic => Color::from_rgb(134, 20, 168),
             Self::Legendary => Color::from_rgb(219, 149, 29),
