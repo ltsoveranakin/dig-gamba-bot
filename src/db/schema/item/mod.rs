@@ -57,7 +57,7 @@ impl Item {
         match self {
             Self::Garbage => 10,
             Self::OldCoin => 8,
-            Self::BrokenTool => 3,
+            Self::BrokenTool => 5,
             Self::Diamond => 1,
             Self::Ruby => 1,
             Self::MetalScraps => 8,
@@ -78,7 +78,7 @@ impl Item {
     fn get_asset_name(&self) -> &str {
         match self {
             Self::Garbage => "garbage",
-            _ => "missing_texture",
+            Self::MetalScraps | Self::Ruby | Self::Diamond | Self::BrokenTool | Self::OldCoin => "missing_texture",
         }
     }
 
