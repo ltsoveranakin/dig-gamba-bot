@@ -1,9 +1,8 @@
-use crate::commands::{default_embed, CommandContext, DigCommandError};
+use crate::commands::{default_embed, default_reply, CommandContext, DigCommandError};
 use crate::db::schema::item::rarity::Rarity;
 use crate::db::schema::item::schema::InventoryItem;
 use crate::db::schema::item::{ItemValue, ITEM_TABLE};
 use crate::db::schema::users::{UserData, USER_TABLE};
-use poise::CreateReply;
 use serenity::all::*;
 use std::time::Duration;
 use surrealdb::types::{RecordId, ToSql};
@@ -78,11 +77,7 @@ pub(super) async fn inventory(
     let components = CreateActionRow::Buttons(buttons);
 
     let m = ctx
-        .send(
-            CreateReply::default()
-                .embed(embed)
-                .components(vec![components]),
-        )
+        .send(default_reply().embed(embed).components(vec![components]))
         .await?;
 
     while let Some(mci) = m

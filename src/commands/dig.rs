@@ -1,7 +1,6 @@
-use crate::commands::{default_embed, CommandContext, DigCommandError};
+use crate::commands::{default_embed, default_reply, CommandContext, DigCommandError};
 use crate::db::schema::item::rarity::Rarity;
 use crate::db::schema::item::schema::InventoryItem;
-use poise::CreateReply;
 use rand::prelude::IndexedRandom;
 use rand::RngExt;
 use serenity::all::CreateAttachment;
@@ -43,7 +42,7 @@ pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> 
         .replace("$item", &item_type.to_string());
 
     ctx.send(
-        CreateReply::default()
+        default_reply()
             .embed(
                 default_embed()
                     .image(format!("attachment://{}", item_file_name))

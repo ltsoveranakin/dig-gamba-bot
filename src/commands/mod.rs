@@ -33,6 +33,10 @@ pub(super) fn default_embed() -> CreateEmbed {
         .color(Color::from_rgb(112, 50, 2))
 }
 
-fn default_reply(message: impl Into<String>) -> CreateReply {
-    CreateReply::default().embed(default_embed().description(message))
+fn default_reply() -> CreateReply {
+    CreateReply::default().ephemeral(true)
+}
+
+fn default_reply_msg(message: impl Into<String>) -> CreateReply {
+    default_reply().embed(default_embed().description(message))
 }
