@@ -1,4 +1,6 @@
-use crate::commands::{default_embed, default_reply, CommandContext, DigCommandError};
+use crate::commands::{
+    default_embed, default_reply, default_reply_msg, CommandContext, DigCommandError,
+};
 use crate::db::schema::item::rarity::Rarity;
 use crate::db::schema::item::schema::InventoryItem;
 use crate::db::schema::item::{ItemValue, ITEM_TABLE};
@@ -37,6 +39,13 @@ pub(super) async fn inventory(
     let items: Vec<InventoryItem> = results.take(0)?;
     let count = results.take::<Option<u32>>(1)?.unwrap_or(0);
 
+    if items.is_empty() {
+        ctx.send(default_reply_msg("Invalid page number provided!"))
+            .await?;
+
+        return Ok(());
+    }
+
     let mut fields = Vec::with_capacity(items.len());
     let mut buttons = Vec::with_capacity(items.len());
 
@@ -70,7 +79,7 @@ pub(super) async fn inventory(
         .footer(CreateEmbedFooter::new(format!(
             "Page {} of {}",
             page_number,
-            (count / INVENTORY_RETURN_LIMIT) + 1
+            ((count + INVENTORY_RETURN_LIMIT) - 1) / INVENTORY_RETURN_LIMIT
         )))
         .fields(fields);
 
