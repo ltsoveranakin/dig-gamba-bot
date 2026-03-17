@@ -28,10 +28,8 @@ impl Rarity {
             Self::Perfect => Color::from_rgb(0, 255, 200),
         }
     }
-}
 
-impl From<f64> for Rarity {
-    fn from(value: f64) -> Self {
+    pub(crate) fn from_float(value: f64) -> Self {
         match value {
             0.0..COMMON_BOUNDS_UPPER => Self::Common,
             COMMON_BOUNDS_UPPER..UNCOMMON_BOUNDS_UPPER => Self::Uncommon,

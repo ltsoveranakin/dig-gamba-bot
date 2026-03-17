@@ -7,7 +7,7 @@ use poise::CreateReply;
 pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
     let item = InventoryItem::create_new(&ctx).await?;
 
-    let rarity = Rarity::from(item.rarity);
+    let rarity = Rarity::from_float(item.rarity);
     let mut rarity_variant_str = rarity.to_string();
 
     rarity_variant_str.make_ascii_lowercase();

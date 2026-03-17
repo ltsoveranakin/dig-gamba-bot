@@ -57,7 +57,7 @@ pub(super) async fn inventory(
             format!("{emoji_number} {item_type_str}",),
             format!(
                 "Rarity: ({})\nFloat: {:.5}\nValue: ${}",
-                Rarity::from(inventory_item.rarity),
+                Rarity::from_float(inventory_item.rarity),
                 inventory_item.rarity,
                 item_value
             ),

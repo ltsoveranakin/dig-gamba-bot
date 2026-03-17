@@ -55,7 +55,7 @@ impl ItemValue for Item {
 impl Item {
     fn get_drop_weight(&self) -> usize {
         match self {
-            Self::Garbage => 20,
+            Self::Garbage => 10,
             Self::OldCoin => 8,
             Self::BrokenTool => 3,
             Self::Diamond => 1,
