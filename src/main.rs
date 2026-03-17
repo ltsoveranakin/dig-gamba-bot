@@ -2,15 +2,13 @@ mod commands;
 mod data;
 mod db;
 
-use crate::commands::COMMAND_LIST;
 use anyhow::Context;
-use std::sync::Mutex;
 
+use crate::commands::{AllCommands, CommandList};
+use crate::data::Data;
 use poise::serenity_prelude::*;
-use rand::make_rng;
 use surrealdb::engine::local::SurrealKv;
 use surrealdb::Surreal;
-use crate::data::Data;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -18,11 +16,7 @@ async fn main() -> anyhow::Result<()> {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: COMMAND_LIST
-                .write()
-                .expect("RWLock not poisoned")
-                .take()
-                .expect("Command list initialized"),
+            commands: AllCommands::get(),
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
@@ -37,9 +31,7 @@ async fn main() -> anyhow::Result<()> {
 
                 println!("Db set up");
 
-                let rng = Mutex::new(make_rng());
-
-                Ok(Data { db, rng })
+                Ok(Data::new(db))
             })
         })
         .build();

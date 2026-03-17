@@ -1,31 +1,40 @@
 mod balance;
 mod create;
 pub mod dig;
+mod gambling;
 mod inventory;
 pub mod sell;
 
 use crate::commands::balance::balance;
 use crate::commands::create::create;
 use crate::commands::dig::dig;
+use crate::commands::gambling::GamblingCommands;
 use crate::commands::inventory::inventory;
 use crate::commands::sell::sell;
 use crate::Data;
 use poise::CreateReply;
 use serenity::all::{Color, CreateEmbed};
-use std::sync::{LazyLock, RwLock};
+use std::iter::Extend;
 
 pub(crate) type CommandContext<'a> = poise::Context<'a, Data, DigCommandError>;
 pub(crate) type DigCommandError = Box<dyn std::error::Error + Send + Sync>;
 
-pub(super) static COMMAND_LIST: LazyLock<
-    RwLock<Option<Vec<poise::Command<Data, DigCommandError>>>>,
-> = LazyLock::new(|| {
-    let commands = vec![balance(), create(), dig(), inventory(), sell()];
+type CommandVec = Vec<poise::Command<Data, DigCommandError>>;
 
-    let cell = RwLock::new(Some(commands));
+pub(super) trait CommandList {
+    fn get() -> CommandVec;
+}
 
-    cell
-});
+pub(super) struct AllCommands;
+
+impl CommandList for AllCommands {
+    fn get() -> CommandVec {
+        let mut command_vec = vec![balance(), create(), dig(), inventory(), sell()];
+        command_vec.extend(GamblingCommands::get());
+
+        command_vec
+    }
+}
 
 pub(super) fn default_embed() -> CreateEmbed {
     CreateEmbed::default()
