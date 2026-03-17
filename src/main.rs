@@ -1,4 +1,5 @@
 mod commands;
+mod data;
 mod db;
 
 use crate::commands::COMMAND_LIST;
@@ -7,14 +8,9 @@ use std::sync::Mutex;
 
 use poise::serenity_prelude::*;
 use rand::make_rng;
-use rand::prelude::SmallRng;
 use surrealdb::engine::local::SurrealKv;
 use surrealdb::Surreal;
-
-pub(crate) struct Data {
-    pub(crate) db: Surreal<surrealdb::engine::local::Db>,
-    pub(crate) rng: Mutex<SmallRng>,
-}
+use crate::data::Data;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

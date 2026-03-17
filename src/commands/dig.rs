@@ -37,15 +37,10 @@ pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> 
         }
     };
 
-    let drop_text = DROP_TEXTS[ctx
-        .data()
-        .rng
-        .lock()
-        .expect("Rng mutex lock poisoned")
-        .random_range(0..DROP_TEXTS.len())]
-    .replace("$article", article)
-    .replace("$rarity", &rarity.to_string().to_ascii_lowercase())
-    .replace("$item", &item_type.to_string());
+    let drop_text = DROP_TEXTS[ctx.data().rng_mut().random_range(0..DROP_TEXTS.len())]
+        .replace("$article", article)
+        .replace("$rarity", &rarity.to_string().to_ascii_lowercase())
+        .replace("$item", &item_type.to_string());
 
     ctx.send(
         CreateReply::default()
