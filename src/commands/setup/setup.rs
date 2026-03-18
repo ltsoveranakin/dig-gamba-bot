@@ -2,7 +2,7 @@ use crate::commands::{default_reply_msg, CommandContext, DigCommandError};
 use serenity::all::{ChannelType, CreateChannel};
 
 const DIGGING_CATEGORY_NAME: &str = "Digging";
-const THE_BEACH_CHANNEL_NAME: &str = "The-Beach";
+pub(crate) const THE_BEACH_CHANNEL_NAME: &str = "beach";
 
 #[poise::command(
     slash_command,

@@ -3,7 +3,7 @@ use crate::commands::setup::setup::setup;
 use crate::commands::{CommandList, CommandVec};
 
 mod create;
-mod setup;
+pub(super) mod setup;
 
 pub(super) struct SetupCommands;
 
