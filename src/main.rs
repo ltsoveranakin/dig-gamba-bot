@@ -36,7 +36,7 @@ async fn main() -> anyhow::Result<()> {
         })
         .build();
 
-    let intents = GatewayIntents::non_privileged();
+    let intents = GatewayIntents::non_privileged() | GatewayIntents::GUILDS;
 
     let mut client = ClientBuilder::new(&token, intents)
         .framework(framework)
