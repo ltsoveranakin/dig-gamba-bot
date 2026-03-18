@@ -1,14 +1,14 @@
 mod balance;
-mod create;
-pub mod digging;
+mod digging;
 mod gambling;
 mod inventory;
+mod setup;
 
 use crate::commands::balance::balance;
-use crate::commands::create::create;
 use crate::commands::digging::DiggingCommands;
 use crate::commands::gambling::GamblingCommands;
 use crate::commands::inventory::InventoryCommands;
+use crate::commands::setup::SetupCommands;
 use crate::Data;
 use poise::CreateReply;
 use serenity::all::{Color, CreateEmbed};
@@ -27,11 +27,12 @@ pub(super) struct AllCommands;
 
 impl CommandList for AllCommands {
     fn get() -> CommandVec {
-        let mut command_vec = vec![balance(), create()]
+        let mut command_vec = vec![balance()]
             .into_iter()
             .chain(InventoryCommands::get())
             .chain(GamblingCommands::get())
             .chain(DiggingCommands::get())
+            .chain(SetupCommands::get())
             .collect();
 
         command_vec
