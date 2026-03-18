@@ -1,5 +1,9 @@
+mod sell;
+
+use crate::commands::inventory::sell::sell;
 use crate::commands::{
-    default_embed, default_reply, default_reply_msg, CommandContext, DigCommandError,
+    default_embed, default_reply, default_reply_msg, CommandContext, CommandList, CommandVec,
+    DigCommandError,
 };
 use crate::db::schema::item::rarity::Rarity;
 use crate::db::schema::item::schema::InventoryItem;
@@ -9,11 +13,19 @@ use serenity::all::*;
 use std::time::Duration;
 use surrealdb::types::{RecordId, ToSql};
 
+pub(super) struct InventoryCommands;
+
+impl CommandList for InventoryCommands {
+    fn get() -> CommandVec {
+        vec![inventory(), sell()]
+    }
+}
+
 const INVENTORY_RETURN_LIMIT: u32 = 5;
 static EMOJI_NUMBERS: [&str; INVENTORY_RETURN_LIMIT as usize] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
 
 #[poise::command(slash_command)]
-pub(super) async fn inventory(
+async fn inventory(
     ctx: CommandContext<'_>,
     #[description = "The page number of the inventory to display"] page_number: Option<u32>,
 ) -> Result<(), DigCommandError> {

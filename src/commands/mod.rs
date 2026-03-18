@@ -9,7 +9,7 @@ use crate::commands::balance::balance;
 use crate::commands::create::create;
 use crate::commands::dig::dig;
 use crate::commands::gambling::GamblingCommands;
-use crate::commands::inventory::inventory;
+use crate::commands::inventory::InventoryCommands;
 use crate::commands::sell::sell;
 use crate::Data;
 use poise::CreateReply;
@@ -29,8 +29,9 @@ pub(super) struct AllCommands;
 
 impl CommandList for AllCommands {
     fn get() -> CommandVec {
-        let mut command_vec = vec![balance(), create(), dig(), inventory(), sell()];
+        let mut command_vec = vec![balance(), create(), dig()];
         command_vec.extend(GamblingCommands::get());
+        command_vec.extend(InventoryCommands::get());
 
         command_vec
     }
