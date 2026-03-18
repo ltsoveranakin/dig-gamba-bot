@@ -159,6 +159,8 @@ async fn inventory(
             user.balance += item.get_item_value();
         }
 
+        let user_balance = user.balance;
+
         db.update::<Option<UserData>>(UserData::user_resource(&ctx))
             .content(user)
             .await?;
@@ -169,7 +171,7 @@ async fn inventory(
                 CreateInteractionResponseMessage::new()
                     .content(format!(
                         "Item{} sold successfully! Your balance is now ${}",
-                        plural_str, user.balance
+                        plural_str, user_balance
                     ))
                     .ephemeral(true),
             ),

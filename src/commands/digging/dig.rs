@@ -1,9 +1,8 @@
+use rand::RngExt;
+use serenity::all::CreateAttachment;
 use crate::commands::{default_embed, default_reply, CommandContext, DigCommandError};
 use crate::db::schema::item::rarity::Rarity;
 use crate::db::schema::item::schema::InventoryItem;
-use rand::prelude::IndexedRandom;
-use rand::RngExt;
-use serenity::all::CreateAttachment;
 
 static DROP_TEXTS: [&str; 2] = [
     "After some digging you found $article $rarity $item!",
@@ -51,7 +50,7 @@ pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> 
             )
             .attachment(attachment),
     )
-    .await?;
+        .await?;
 
     Ok(())
 }
