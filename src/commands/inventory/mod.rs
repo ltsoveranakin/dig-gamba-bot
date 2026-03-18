@@ -1,6 +1,3 @@
-mod sell;
-
-use crate::commands::inventory::sell::sell;
 use crate::commands::{
     default_embed, default_reply, default_reply_msg, CommandContext, CommandList, CommandVec,
     DigCommandError,
@@ -17,7 +14,7 @@ pub(super) struct InventoryCommands;
 
 impl CommandList for InventoryCommands {
     fn get() -> CommandVec {
-        vec![inventory(), sell()]
+        vec![inventory()]
     }
 }
 
@@ -59,22 +56,26 @@ async fn inventory(
     }
 
     let mut fields = Vec::with_capacity(items.len());
-    let mut buttons = Vec::with_capacity(items.len());
+    let mut options = Vec::with_capacity(items.len());
 
-    for (i, inventory_item) in items.into_iter().enumerate() {
+    for inventory_item in items.into_iter() {
         let item_type_str = inventory_item.item_type.to_string();
         let item_value = inventory_item.get_item_value();
-        let item_id = inventory_item.id.unwrap().key.to_sql();
+        let item_record_key_str = inventory_item.id.unwrap().key.to_sql();
+        let rarity = inventory_item.rarity;
 
-        let emoji_number = EMOJI_NUMBERS[i];
-
-        buttons.push(
-            CreateButton::new(item_id.clone())
-                .label(format!("{emoji_number} Sell {item_type_str}")),
-        );
+        options.push(CreateSelectMenuOption::new(
+            format!(
+                "{} ({}) ${}",
+                item_type_str,
+                Rarity::from_float(rarity),
+                item_value
+            ),
+            item_record_key_str,
+        ));
 
         fields.push((
-            format!("{emoji_number} {item_type_str}",),
+            item_type_str,
             format!(
                 "Rarity: ({})\nFloat: {:.5}\nValue: ${}",
                 Rarity::from_float(inventory_item.rarity),
@@ -84,6 +85,13 @@ async fn inventory(
             false,
         ));
     }
+
+    let components = vec![CreateActionRow::SelectMenu(
+        CreateSelectMenu::new("sell_select", CreateSelectMenuKind::String { options })
+            .placeholder("Choose items to sell")
+            .min_values(1)
+            .max_values(5),
+    )];
 
     let embed = default_embed()
         .title(format!("{}'s Inventory", ctx.author().name))
@@ -95,10 +103,8 @@ async fn inventory(
         )))
         .fields(fields);
 
-    let components = CreateActionRow::Buttons(buttons);
-
     let m = ctx
-        .send(default_reply().embed(embed).components(vec![components]))
+        .send(default_reply().embed(embed).components(components))
         .await?;
 
     while let Some(mci) = m
@@ -111,15 +117,35 @@ async fn inventory(
     {
         let mut user = UserData::get_user(&ctx).await?;
 
-        let item: Option<InventoryItem> =
-            db.delete((ITEM_TABLE, mci.data.custom_id.clone())).await?;
+        let items: Vec<InventoryItem> = match mci.data.kind {
+            ComponentInteractionDataKind::StringSelect { ref values } => db
+                .query("DELETE item WHERE id IN $values RETURN BEFORE;")
+                .bind((
+                    "values",
+                    values
+                        .iter()
+                        .map(|record_key| RecordId::new(ITEM_TABLE, record_key.clone()))
+                        .collect::<Vec<RecordId>>(),
+                ))
+                .await?
+                .take(0)?,
 
-        let Some(item) = item else {
+            _ => {
+                ctx.send(default_reply_msg(
+                    "Unknown interaction, your item has not been sold",
+                ))
+                .await?;
+
+                continue;
+            }
+        };
+
+        if items.is_empty() {
             mci.create_response(
                 ctx.serenity_context(),
                 CreateInteractionResponse::Message(
                     CreateInteractionResponseMessage::new()
-                        .content("An error occurred (could not find item to delete)"),
+                        .content("An error occurred (could not find item(s) to sell). Your items have not been sold."),
                 ),
             )
             .await?;
@@ -127,7 +153,11 @@ async fn inventory(
             continue;
         };
 
-        user.balance += item.get_item_value();
+        let plural_str = if items.len() != 1 { "s" } else { "" };
+
+        for item in items {
+            user.balance += item.get_item_value();
+        }
 
         db.update::<Option<UserData>>(UserData::user_resource(&ctx))
             .content(user)
@@ -137,7 +167,10 @@ async fn inventory(
             ctx.serenity_context(),
             CreateInteractionResponse::Message(
                 CreateInteractionResponseMessage::new()
-                    .content("Item sold successfully!")
+                    .content(format!(
+                        "Item{} sold successfully! Your balance is now ${}",
+                        plural_str, user.balance
+                    ))
                     .ephemeral(true),
             ),
         )

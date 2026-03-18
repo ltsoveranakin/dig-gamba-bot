@@ -3,14 +3,12 @@ mod create;
 pub mod dig;
 mod gambling;
 mod inventory;
-pub mod sell;
 
 use crate::commands::balance::balance;
 use crate::commands::create::create;
 use crate::commands::dig::dig;
 use crate::commands::gambling::GamblingCommands;
 use crate::commands::inventory::InventoryCommands;
-use crate::commands::sell::sell;
 use crate::Data;
 use poise::CreateReply;
 use serenity::all::{Color, CreateEmbed};
