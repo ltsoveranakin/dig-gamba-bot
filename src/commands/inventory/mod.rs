@@ -88,7 +88,7 @@ async fn inventory(
 
     let components = vec![CreateActionRow::SelectMenu(
         CreateSelectMenu::new("sell_select", CreateSelectMenuKind::String { options })
-            .placeholder("Choose items to sell")
+            .placeholder("Sell items")
             .min_values(1)
             .max_values(5),
     )];
