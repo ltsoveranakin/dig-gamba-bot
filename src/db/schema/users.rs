@@ -1,4 +1,5 @@
 use crate::commands::{CommandContext, DigCommandError};
+use serenity::all::UserId;
 
 use surrealdb::types::SurrealValue;
 
@@ -17,10 +18,24 @@ impl Default for UserData {
 
 impl UserData {
     pub(crate) async fn get_user(ctx: &CommandContext<'_>) -> Result<Self, DigCommandError> {
+        Self::get_user_by_id(ctx, ctx.author().id).await
+    }
+
+    // pub(crate) async fn get_user_by_serenity_user(
+    //     ctx: &CommandContext<'_>,
+    //     user: Option<User>,
+    // ) -> Result<Self, DigCommandError> {
+    //     Self::get_user_by_id(ctx, user.map(|user| user.id))
+    // }
+
+    pub(crate) async fn get_user_by_id(
+        ctx: &CommandContext<'_>,
+        user_id: UserId,
+    ) -> Result<Self, DigCommandError> {
         if let Ok(user) = ctx
             .data()
             .db
-            .select::<Option<Self>>(Self::user_resource(ctx))
+            .select::<Option<Self>>(Self::user_resource_by_id(user_id))
             .await
         {
             if let Some(user) = user {
@@ -49,6 +64,10 @@ impl UserData {
     }
 
     pub(crate) fn user_resource(ctx: &CommandContext) -> (&'static str, String) {
-        (USER_TABLE, ctx.author().id.get().to_string())
+        Self::user_resource_by_id(ctx.author().id)
+    }
+
+    fn user_resource_by_id(user_id: UserId) -> (&'static str, String) {
+        (USER_TABLE, user_id.get().to_string())
     }
 }
