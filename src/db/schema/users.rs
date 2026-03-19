@@ -1,18 +1,22 @@
 use crate::commands::{CommandContext, DigCommandError};
 use serenity::all::UserId;
 
-use surrealdb::types::SurrealValue;
+use surrealdb::types::{RecordId, SurrealValue};
 
 pub(crate) const USER_TABLE: &str = "user";
 
 #[derive(SurrealValue, Debug)]
 pub(crate) struct UserData {
     pub(crate) balance: u64,
+    pub(crate) id: Option<RecordId>,
 }
 
 impl Default for UserData {
     fn default() -> Self {
-        Self { balance: 0 }
+        Self {
+            balance: 0,
+            id: None,
+        }
     }
 }
 
@@ -63,11 +67,11 @@ impl UserData {
         Ok(user.unwrap())
     }
 
-    pub(crate) fn user_resource(ctx: &CommandContext) -> (&'static str, String) {
+    pub(crate) fn user_resource(ctx: &CommandContext) -> (&'static str, i64) {
         Self::user_resource_by_id(ctx.author().id)
     }
 
-    fn user_resource_by_id(user_id: UserId) -> (&'static str, String) {
-        (USER_TABLE, user_id.get().to_string())
+    fn user_resource_by_id(user_id: UserId) -> (&'static str, i64) {
+        (USER_TABLE, user_id.get() as i64)
     }
 }

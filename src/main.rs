@@ -15,6 +15,10 @@ use surrealdb::Surreal;
 #[command(version, about, long_about = None)]
 struct Args {
     token: Option<String>,
+    #[arg(long)]
+    drop_users: bool,
+    #[arg(long)]
+    drop_items: bool,
 }
 
 #[tokio::main]
@@ -36,7 +40,7 @@ async fn main() -> anyhow::Result<()> {
             commands: AllCommands::get(),
             ..Default::default()
         })
-        .setup(|ctx, _ready, framework| {
+        .setup(move |ctx, _ready, framework| {
             Box::pin(async move {
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
 
@@ -47,6 +51,18 @@ async fn main() -> anyhow::Result<()> {
                 db.use_ns("dig_bot").use_db("slash_dig").await?;
 
                 println!("Db set up");
+
+                if args.drop_users {
+                    // Holay Molay
+                    println!("Dropping users table");
+                    db.query("DELETE user").await?;
+                }
+
+                if args.drop_items {
+                    // Holay Molay
+                    println!("Dropping items table");
+                    db.query("DELETE item").await?;
+                }
 
                 Ok(Data::new(db))
             })

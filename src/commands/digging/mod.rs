@@ -7,6 +7,13 @@ use crate::commands::{
 };
 use rand::prelude::IndexedRandom;
 use rand::RngExt;
+use std::collections::HashSet;
+use std::sync::LazyLock;
+
+const ALLOWED_DIGGING_CHANNELS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
+    let allowed_channels = [THE_BEACH_CHANNEL_NAME, "dev-testing"];
+    allowed_channels.into_iter().collect()
+});
 
 pub(super) struct DiggingCommands;
 
@@ -19,7 +26,9 @@ impl CommandList for DiggingCommands {
 async fn can_dig_in_channel(ctx: &CommandContext<'_>) -> Result<bool, DigCommandError> {
     let channel = ctx.guild_channel().await.ok_or("Must be in a server")?;
 
-    let can_dig = if channel.name == THE_BEACH_CHANNEL_NAME {
+    // let channel_name = *channel.name;
+
+    let can_dig = if ALLOWED_DIGGING_CHANNELS.contains(&*channel.name) {
         true
     } else {
         ctx.send(default_reply_msg(

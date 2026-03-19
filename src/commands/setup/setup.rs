@@ -13,20 +13,25 @@ pub(super) async fn setup(ctx: CommandContext<'_>) -> serenity::Result<(), DigCo
     ctx.send(default_reply_msg("Setting up /Dig for this server"))
         .await?;
 
-    let guild_id = ctx.guild_id().ok_or("Must be in a server")?;
+    let existing_digging_category_id;
 
-    let channels = guild_id.channels(ctx).await?;
+    {
+        existing_digging_category_id = ctx
+            .guild()
+            .ok_or("Must be in a server")?
+            .channels
+            .values()
+            .find_map(|channel| {
+                if channel.name == DIGGING_CATEGORY_NAME && channel.kind == ChannelType::Category {
+                    Some(channel.id)
+                } else {
+                    None
+                }
+            });
+    }
 
     let mut created_digging_category = false;
     let mut created_beach = false;
-
-    let existing_digging_category_id = channels.values().find_map(|channel| {
-        if channel.name == DIGGING_CATEGORY_NAME && channel.kind == ChannelType::Category {
-            Some(channel.id)
-        } else {
-            None
-        }
-    });
 
     let digging_category_id = if let Some(existing_category) = existing_digging_category_id {
         existing_category
@@ -35,12 +40,19 @@ pub(super) async fn setup(ctx: CommandContext<'_>) -> serenity::Result<(), DigCo
 
         let channel_builder = CreateChannel::new(DIGGING_CATEGORY_NAME).kind(ChannelType::Category);
 
-        let channel = guild_id.create_channel(ctx, channel_builder).await?;
+        let channel = ctx
+            .guild_id()
+            .ok_or("Must be in a server")?
+            .create_channel(ctx, channel_builder)
+            .await?;
 
         channel.id
     };
 
-    if channels
+    if ctx
+        .guild()
+        .ok_or("Must be in a server")?
+        .channels
         .values()
         .find(|channel| channel.name == THE_BEACH_CHANNEL_NAME)
         .is_none()
@@ -50,7 +62,10 @@ pub(super) async fn setup(ctx: CommandContext<'_>) -> serenity::Result<(), DigCo
             .kind(ChannelType::Text)
             .category(digging_category_id);
 
-        guild_id.create_channel(ctx, channel_builder).await?;
+        ctx.guild_id()
+            .ok_or("Must be in a server")?
+            .create_channel(ctx, channel_builder)
+            .await?;
     }
 
     ctx.send(default_reply_msg(format!(
