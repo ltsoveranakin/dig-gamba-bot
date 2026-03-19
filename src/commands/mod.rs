@@ -1,13 +1,13 @@
 mod digging;
 mod economy;
-mod gambling;
+mod games;
 mod help;
 mod inventory;
 mod setup;
 
 use crate::commands::digging::DiggingCommands;
 use crate::commands::economy::EconomyCommands;
-use crate::commands::gambling::GamblingCommands;
+use crate::commands::games::GameCommands;
 use crate::commands::help::HelpCommands;
 use crate::commands::inventory::InventoryCommands;
 use crate::commands::setup::SetupCommands;
@@ -31,7 +31,7 @@ impl CommandList for AllCommands {
     fn get() -> CommandVec {
         let command_lists = vec![
             InventoryCommands::get(),
-            GamblingCommands::get(),
+            GameCommands::get(),
             DiggingCommands::get(),
             SetupCommands::get(),
             EconomyCommands::get(),
