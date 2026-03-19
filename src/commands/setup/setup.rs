@@ -9,7 +9,8 @@ const DIGGING_CATEGORY_NAME: &str = "Digging";
 #[poise::command(
     slash_command,
     category = "setup",
-    required_permissions = "MANAGE_CHANNELS"
+    required_permissions = "MANAGE_CHANNELS",
+    ephemeral
 )]
 pub(super) async fn setup(ctx: CommandContext<'_>) -> serenity::Result<(), DigCommandError> {
     ctx.send(default_reply_msg("Setting up /Dig for this server"))

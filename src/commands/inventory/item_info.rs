@@ -5,7 +5,7 @@ use serenity::all::{CreateAttachment, CreateEmbedAuthor};
 /// Gives information on a specified item
 ///
 /// For example, to get information on the ruby item you can use /iteminfo Ruby
-#[poise::command(slash_command, category = "inventory", rename = "iteminfo")]
+#[poise::command(slash_command, category = "inventory", rename = "iteminfo", ephemeral)]
 pub(super) async fn item_info(
     ctx: CommandContext<'_>,
     #[description = "The item to give information on"] item: Item,
@@ -26,7 +26,7 @@ pub(super) async fn item_info(
                     )
                     .title(item_name)
                     .description(format!(
-                        "{}\nBase item value: {}",
+                        "{}\nBase item value: ${}",
                         item.get_description(),
                         item.get_item_value()
                     )),

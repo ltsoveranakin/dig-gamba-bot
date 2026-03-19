@@ -49,7 +49,7 @@ pub(super) fn default_embed() -> CreateEmbed {
 }
 
 fn default_reply() -> CreateReply {
-    CreateReply::default().ephemeral(false)
+    CreateReply::default()
 }
 
 fn default_reply_msg(message: impl Into<String>) -> CreateReply {
