@@ -26,25 +26,12 @@ impl Display for CoinFlipResult {
 #[poise::command(slash_command, category = "games")]
 pub(super) async fn coin_flip(
     ctx: CommandContext<'_>,
-    #[description = "The amount to bet in the coin flip"] amount: u64,
+    #[description = "The amount to bet in the coin flip"]
+    #[min = 0]
+    #[max = 10_000]
+    amount: u64,
     #[description = "The result to bet on"] result_bet_on: Option<CoinFlipResult>,
 ) -> serenity::Result<(), DigCommandError> {
-    if amount == 0 {
-        ctx.send(default_reply_msg("You can't bet $0!")).await?;
-
-        return Ok(());
-    }
-
-    if amount > MAX_COIN_FLIP_AMOUNT {
-        ctx.send(default_reply_msg(format!(
-            "The maximum amount you can bet is: {}",
-            MAX_COIN_FLIP_AMOUNT
-        )))
-        .await?;
-
-        return Ok(());
-    }
-
     let mut user = UserData::get_user(&ctx).await?;
 
     if user.balance < amount {
