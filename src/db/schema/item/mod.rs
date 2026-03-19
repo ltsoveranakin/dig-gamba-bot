@@ -15,7 +15,7 @@ pub(crate) trait ItemValue {
     fn get_item_value(&self) -> u64;
 }
 
-#[derive(SurrealValue, AllValues, Copy, Clone)]
+#[derive(SurrealValue, poise::ChoiceParameter, AllValues, Copy, Clone)]
 pub(crate) enum Item {
     Garbage,
     OldCoin,

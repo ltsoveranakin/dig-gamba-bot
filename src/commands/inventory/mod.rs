@@ -1,3 +1,5 @@
+mod item_info;
+
 use crate::commands::{
     default_embed, default_reply, default_reply_msg, CommandContext, CommandList, CommandVec,
     DigCommandError,
@@ -9,12 +11,13 @@ use crate::db::schema::users::{UserData, USER_TABLE};
 use serenity::all::*;
 use std::time::Duration;
 use surrealdb::types::{RecordId, ToSql};
+use crate::commands::inventory::item_info::item_info;
 
 pub(super) struct InventoryCommands;
 
 impl CommandList for InventoryCommands {
     fn get() -> CommandVec {
-        vec![inventory()]
+        vec![inventory(), item_info()]
     }
 }
 
