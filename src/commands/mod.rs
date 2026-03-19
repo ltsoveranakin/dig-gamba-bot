@@ -46,7 +46,7 @@ pub(super) fn default_embed() -> CreateEmbed {
 }
 
 fn default_reply() -> CreateReply {
-    CreateReply::default().ephemeral(true)
+    CreateReply::default().ephemeral(false)
 }
 
 fn default_reply_msg(message: impl Into<String>) -> CreateReply {

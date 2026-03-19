@@ -2,17 +2,34 @@ mod commands;
 mod data;
 mod db;
 
-use anyhow::Context;
-
 use crate::commands::{AllCommands, CommandList};
 use crate::data::Data;
+use anyhow::Context;
+use clap::Parser;
 use poise::serenity_prelude::*;
+use std::env;
 use surrealdb::engine::local::SurrealKv;
 use surrealdb::Surreal;
 
+#[derive(Parser)]
+#[command(version, about, long_about = None)]
+struct Args {
+    token: Option<String>,
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let token = std::env::var("bot_token").context("token not set")?;
+    let args = Args::parse();
+
+    let token = if let Some(token) = args.token {
+        println!("Using argument token");
+
+        token
+    } else {
+        println!("No argument token, trying environment token");
+
+        env::var("bot_token").context("token not set")?
+    };
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {

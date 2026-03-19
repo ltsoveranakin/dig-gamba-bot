@@ -1,7 +1,5 @@
 use crate::commands::{CommandContext, DigCommandError};
 
-use std::error::Error;
-use std::fmt::{Display, Formatter};
 use surrealdb::types::SurrealValue;
 
 pub(crate) const USER_TABLE: &str = "user";
@@ -17,17 +15,6 @@ impl Default for UserData {
     }
 }
 
-#[derive(Debug)]
-struct DataFetchError;
-
-impl Display for DataFetchError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("Data fetch err")
-    }
-}
-
-impl Error for DataFetchError {}
-
 impl UserData {
     pub(crate) async fn get_user(ctx: &CommandContext<'_>) -> Result<Self, DigCommandError> {
         if let Ok(user) = ctx
@@ -39,17 +26,15 @@ impl UserData {
             if let Some(user) = user {
                 Ok(user)
             } else {
-                ctx.reply("User profile not yet created, please setup your user with /create")
-                    .await?;
-
-                Err(Box::new(DataFetchError))
+                Self::profile_not_created_error()
             }
         } else {
-            ctx.reply("User profile not yet created, please setup your user with /create")
-                .await?;
-
-            Err(Box::new(DataFetchError))
+            Self::profile_not_created_error()
         }
+    }
+
+    fn profile_not_created_error() -> Result<Self, DigCommandError> {
+        Err("User profile not yet created, please setup your user with /create".into())
     }
 
     pub(crate) async fn create_user(ctx: &CommandContext<'_>) -> Result<Self, DigCommandError> {

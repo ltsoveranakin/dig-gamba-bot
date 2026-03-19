@@ -5,10 +5,13 @@ use crate::db::schema::users::UserData;
 pub(super) async fn create(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
     let user = UserData::create_user(&ctx).await?;
 
-    ctx.send(default_reply_msg(format!(
-        "Your user profile has been created! Your starting balance is: {}",
-        user.balance
-    )))
+    ctx.send(
+        default_reply_msg(format!(
+            "Your user profile has been created! Your starting balance is: {}",
+            user.balance
+        ))
+        .ephemeral(true),
+    )
     .await?;
 
     Ok(())
