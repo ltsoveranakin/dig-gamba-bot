@@ -25,9 +25,13 @@ static EMOJI_NUMBERS: [&str; INVENTORY_RETURN_LIMIT as usize] = ["1️⃣", "2�
 async fn inventory(
     ctx: CommandContext<'_>,
     #[description = "The page number of the inventory to display"] page_number: Option<u32>,
+    #[description = "The user to display inventory of"] target_user: Option<User>,
 ) -> Result<(), DigCommandError> {
     let db = &ctx.data().db;
-    let owner = RecordId::new(USER_TABLE, ctx.author().id.get().to_string());
+
+    let target_user = target_user.as_ref().unwrap_or_else(|| ctx.author());
+
+    let owner = RecordId::new(USER_TABLE, target_user.id.get().to_string());
 
     let page_number = page_number.unwrap_or(1);
     let page_index = page_number - 1;
@@ -94,8 +98,8 @@ async fn inventory(
     )];
 
     let embed = default_embed()
-        .title(format!("{}'s Inventory", ctx.author().name))
-        .thumbnail(ctx.author().face())
+        .title(format!("{}'s Inventory", target_user.name))
+        .thumbnail(target_user.face())
         .footer(CreateEmbedFooter::new(format!(
             "Page {} of {}",
             page_number,
@@ -111,7 +115,7 @@ async fn inventory(
         .message()
         .await?
         .await_component_interaction(&ctx.serenity_context().shard)
-        .author_id(ctx.author().id)
+        .author_id(target_user.id)
         .timeout(Duration::from_secs(60))
         .await
     {

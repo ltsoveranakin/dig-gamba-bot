@@ -1,5 +1,6 @@
 mod balance;
 mod digging;
+mod economy;
 mod gambling;
 mod inventory;
 mod setup;
