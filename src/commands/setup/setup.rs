@@ -1,11 +1,11 @@
 use crate::commands::{default_reply_msg, CommandContext, DigCommandError};
+use crate::db::schema::item::locations::DiggingLocation;
 use serenity::all::{ChannelType, CreateChannel};
+use std::collections::HashSet;
 
 const DIGGING_CATEGORY_NAME: &str = "Digging";
-pub(crate) const THE_BEACH_CHANNEL_NAME: &str = "beach";
 
 /// Automatically sets up the required channels needed to use this bot
-
 #[poise::command(
     slash_command,
     category = "setup",
@@ -14,6 +14,8 @@ pub(crate) const THE_BEACH_CHANNEL_NAME: &str = "beach";
 pub(super) async fn setup(ctx: CommandContext<'_>) -> serenity::Result<(), DigCommandError> {
     ctx.send(default_reply_msg("Setting up /Dig for this server"))
         .await?;
+
+    let guild_id = ctx.guild_id().ok_or("Must be in a server")?;
 
     let existing_digging_category_id;
 
@@ -33,7 +35,7 @@ pub(super) async fn setup(ctx: CommandContext<'_>) -> serenity::Result<(), DigCo
     }
 
     let mut created_digging_category = false;
-    let mut created_beach = false;
+    let mut created_channels = Vec::new();
 
     let digging_category_id = if let Some(existing_category) = existing_digging_category_id {
         existing_category
@@ -42,40 +44,40 @@ pub(super) async fn setup(ctx: CommandContext<'_>) -> serenity::Result<(), DigCo
 
         let channel_builder = CreateChannel::new(DIGGING_CATEGORY_NAME).kind(ChannelType::Category);
 
-        let channel = ctx
-            .guild_id()
-            .ok_or("Must be in a server")?
-            .create_channel(ctx, channel_builder)
-            .await?;
+        let channel = guild_id.create_channel(ctx, channel_builder).await?;
 
         channel.id
     };
 
-    if ctx
+    let channel_name_map: HashSet<String> = ctx
         .guild()
         .ok_or("Must be in a server")?
         .channels
         .values()
-        .find(|channel| channel.name == THE_BEACH_CHANNEL_NAME)
-        .is_none()
-    {
-        created_beach = true;
-        let channel_builder = CreateChannel::new(THE_BEACH_CHANNEL_NAME)
-            .kind(ChannelType::Text)
-            .category(digging_category_id);
+        .map(|channel| channel.name.clone())
+        .collect();
 
-        ctx.guild_id()
-            .ok_or("Must be in a server")?
-            .create_channel(ctx, channel_builder)
-            .await?;
+    for digging_location in DiggingLocation::all_values() {
+        let channel_name = digging_location.get_channel_name();
+
+        if !channel_name_map.contains(channel_name) {
+            let channel_builder = CreateChannel::new(channel_name)
+                .kind(ChannelType::Text)
+                .category(digging_category_id);
+
+            guild_id.create_channel(ctx, channel_builder).await?;
+
+            created_channels.push(channel_name);
+        }
     }
 
     ctx.send(default_reply_msg(format!(
         "\
             Successfully created necessary channels!\n\
             Created digging category: {created_digging_category}\n\
-            Created beach channel: {created_beach}\
-        "
+            Created channels: {}\
+        ",
+        created_channels.join(", ")
     )))
     .await?;
 
