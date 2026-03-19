@@ -1,17 +1,24 @@
 mod dig;
 
 use crate::commands::digging::dig::dig;
-use crate::commands::setup::setup::THE_BEACH_CHANNEL_NAME;
 use crate::commands::{
     default_reply_msg, CommandContext, CommandList, CommandVec, DigCommandError,
 };
+use derive_enum_all_values::AllValues;
 use rand::prelude::IndexedRandom;
 use rand::RngExt;
 use std::collections::HashSet;
 use std::sync::LazyLock;
 
 const ALLOWED_DIGGING_CHANNELS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
-    let allowed_channels = [THE_BEACH_CHANNEL_NAME, "dev-testing"];
+    let mut allowed_channels = vec!["dev-testing"];
+
+    allowed_channels.extend(
+        DiggingChannels::all_values()
+            .iter()
+            .map(|digging_channel| digging_channel.get_channel_name()),
+    );
+
     allowed_channels.into_iter().collect()
 });
 
@@ -23,20 +30,29 @@ impl CommandList for DiggingCommands {
     }
 }
 
+#[derive(AllValues)]
+pub(crate) enum DiggingChannels {
+    Beach,
+}
+
+impl DiggingChannels {
+    pub(crate) fn get_channel_name(&self) -> &'static str {
+        match self {
+            Self::Beach => "beach",
+        }
+    }
+}
+
 async fn can_dig_in_channel(ctx: &CommandContext<'_>) -> Result<bool, DigCommandError> {
     let channel = ctx.guild_channel().await.ok_or("Must be in a server")?;
 
-    // let channel_name = *channel.name;
-
-    let can_dig = if ALLOWED_DIGGING_CHANNELS.contains(&*channel.name) {
-        true
+    if ALLOWED_DIGGING_CHANNELS.contains(&*channel.name) {
+        Ok(true)
     } else {
         ctx.send(default_reply_msg(
-            "You can't dig here!\nTry the beach, I heard there's some good things to find there.",
+            "You can't dig here!\nTry the beach, I heard it's a good place to start.",
         ))
         .await?;
-        false
-    };
-
-    Ok(can_dig)
+        Ok(false)
+    }
 }
