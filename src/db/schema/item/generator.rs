@@ -13,9 +13,7 @@ pub(crate) struct ItemGenerator {
 
 impl ItemGenerator {
     fn new() -> Self {
-        let drop_table = [(Item::Garbage, 30), (Item::OldCoin, 10)];
-
-        let mut weights = Vec::with_capacity(drop_table.len());
+        let mut weights = Vec::with_capacity(Item::all_values().len());
 
         for item in Item::all_values() {
             weights.push(item.get_drop_weight());

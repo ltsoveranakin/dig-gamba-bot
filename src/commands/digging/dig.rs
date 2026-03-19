@@ -1,7 +1,7 @@
 use crate::commands::digging::can_dig_in_channel;
 use crate::commands::{default_embed, default_reply, CommandContext, DigCommandError};
+use crate::db::schema::item::inventory_item::InventoryItem;
 use crate::db::schema::item::rarity::Rarity;
-use crate::db::schema::item::schema::InventoryItem;
 use rand::RngExt;
 use serenity::all::CreateAttachment;
 

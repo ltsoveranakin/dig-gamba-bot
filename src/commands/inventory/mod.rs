@@ -2,8 +2,8 @@ use crate::commands::{
     default_embed, default_reply, default_reply_msg, CommandContext, CommandList, CommandVec,
     DigCommandError,
 };
+use crate::db::schema::item::inventory_item::InventoryItem;
 use crate::db::schema::item::rarity::Rarity;
-use crate::db::schema::item::schema::InventoryItem;
 use crate::db::schema::item::{ItemValue, ITEM_TABLE};
 use crate::db::schema::users::{UserData, USER_TABLE};
 use serenity::all::*;
@@ -21,11 +21,18 @@ impl CommandList for InventoryCommands {
 const INVENTORY_RETURN_LIMIT: u32 = 5;
 static EMOJI_NUMBERS: [&str; INVENTORY_RETURN_LIMIT as usize] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
 
+#[derive(poise::ChoiceParameter)]
+enum SortMode {
+    ItemType,
+    Rarity,
+}
+
 #[poise::command(slash_command)]
 async fn inventory(
     ctx: CommandContext<'_>,
     #[description = "The page number of the inventory to display"] page_number: Option<u32>,
     #[description = "The user to display inventory of"] target_user: Option<User>,
+    #[description = "The order to return the data"] sort_mode: Option<SortMode>,
 ) -> Result<(), DigCommandError> {
     let db = &ctx.data().db;
 
@@ -37,13 +44,25 @@ async fn inventory(
     let page_index = page_number - 1;
     let start = page_index * INVENTORY_RETURN_LIMIT;
 
+    let order_by_text = if let Some(sort_mode) = sort_mode {
+        let sort_field = match sort_mode {
+            SortMode::Rarity => "rarity",
+
+            SortMode::ItemType => "item_type",
+        };
+
+        format!(" ORDER BY {} DESC", sort_field)
+    } else {
+        String::new()
+    };
+
     let mut results = db
-        .query(
+        .query(format!(
             r#"
-        SELECT * FROM item WHERE owner = $owner LIMIT $limit START $start;
+        SELECT * FROM item WHERE owner = $owner{order_by_text} LIMIT $limit START $start;
         SELECT VALUE count() FROM item WHERE owner = $owner GROUP ALL;
         "#,
-        )
+        ))
         .bind(("owner", owner))
         .bind(("limit", INVENTORY_RETURN_LIMIT))
         .bind(("start", start))

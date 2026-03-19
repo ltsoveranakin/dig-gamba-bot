@@ -1,6 +1,6 @@
 pub(crate) mod generator;
+pub(crate) mod inventory_item;
 pub(crate) mod rarity;
-pub(crate) mod schema;
 
 use derive_enum_all_values::AllValues;
 use std::fmt::{Display, Formatter};
@@ -78,7 +78,9 @@ impl Item {
     fn get_asset_name(&self) -> &str {
         match self {
             Self::Garbage => "garbage",
-            Self::MetalScraps | Self::Ruby | Self::Diamond | Self::BrokenTool | Self::OldCoin => "missing_texture",
+            Self::MetalScraps | Self::Ruby | Self::Diamond | Self::BrokenTool | Self::OldCoin => {
+                "missing_texture"
+            }
         }
     }
 
