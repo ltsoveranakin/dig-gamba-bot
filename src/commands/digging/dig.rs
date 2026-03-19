@@ -10,7 +10,7 @@ static DROP_TEXTS: [&str; 2] = [
     "It was hard work, but you found $article $rarity $item!",
 ];
 
-#[poise::command(slash_command)]
+#[poise::command(slash_command, category = "digging")]
 pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
     if !can_dig_in_channel(&ctx).await? {
         return Ok(());

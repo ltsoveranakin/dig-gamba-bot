@@ -27,7 +27,7 @@ enum SortMode {
     Rarity,
 }
 
-#[poise::command(slash_command)]
+#[poise::command(slash_command, category = "inventory")]
 async fn inventory(
     ctx: CommandContext<'_>,
     #[description = "The page number of the inventory to display"] page_number: Option<u32>,

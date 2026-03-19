@@ -1,12 +1,14 @@
 mod digging;
 mod economy;
 mod gambling;
+mod help;
 mod inventory;
 mod setup;
 
 use crate::commands::digging::DiggingCommands;
 use crate::commands::economy::EconomyCommands;
 use crate::commands::gambling::GamblingCommands;
+use crate::commands::help::HelpCommands;
 use crate::commands::inventory::InventoryCommands;
 use crate::commands::setup::SetupCommands;
 use crate::Data;
@@ -27,16 +29,16 @@ pub(super) struct AllCommands;
 
 impl CommandList for AllCommands {
     fn get() -> CommandVec {
-        let mut command_vec = Vec::new()
-            .into_iter()
-            .chain(InventoryCommands::get())
-            .chain(GamblingCommands::get())
-            .chain(DiggingCommands::get())
-            .chain(SetupCommands::get())
-            .chain(EconomyCommands::get())
-            .collect();
+        let command_lists = vec![
+            InventoryCommands::get(),
+            GamblingCommands::get(),
+            DiggingCommands::get(),
+            SetupCommands::get(),
+            EconomyCommands::get(),
+            HelpCommands::get(),
+        ];
 
-        command_vec
+        command_lists.into_iter().flatten().collect()
     }
 }
 

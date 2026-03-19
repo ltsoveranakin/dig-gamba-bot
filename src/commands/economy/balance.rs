@@ -2,7 +2,7 @@ use crate::commands::{default_reply_msg, CommandContext, DigCommandError};
 use crate::db::schema::users::UserData;
 use serenity::all::User;
 
-#[poise::command(slash_command)]
+#[poise::command(slash_command, category = "economy")]
 pub(super) async fn balance(
     ctx: CommandContext<'_>,
     #[description = "The user's balance to display"] target_user: Option<User>,
