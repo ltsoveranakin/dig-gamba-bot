@@ -1,27 +1,36 @@
+use crate::db::schema::item::locations::DiggingLocation;
 use crate::db::schema::item::Item;
 use rand::distr::weighted::WeightedIndex;
 use rand::make_rng;
 use rand::prelude::{Distribution, SmallRng};
-use std::sync::{LazyLock, RwLock, RwLockWriteGuard};
+use std::sync::{RwLock, RwLockWriteGuard};
 
-pub(crate) static ITEM_GENERATOR: LazyLock<ItemGenerator> = LazyLock::new(|| ItemGenerator::new());
+// pub(crate) static ITEM_GENERATOR: LazyLock<ItemGenerator> = LazyLock::new(|| ItemGenerator::new());
 
 pub(crate) struct ItemGenerator {
     rng: RwLock<SmallRng>,
-    distribution: WeightedIndex<usize>,
+    items: Vec<Item>,
+    distribution: WeightedIndex<u32>,
 }
 
 impl ItemGenerator {
-    fn new() -> Self {
-        let mut weights = Vec::with_capacity(Item::all_values().len());
+    pub(crate) fn new(digging_location: DiggingLocation) -> Self {
+        let drop_pool = digging_location.get_drop_pool();
 
-        for item in Item::all_values() {
-            weights.push(item.get_drop_weight());
+        let mut items = Vec::with_capacity(drop_pool.len());
+        let mut weights = Vec::with_capacity(drop_pool.len());
+
+        for (item, drop_weight) in drop_pool {
+            debug_assert!(*drop_weight > 0);
+
+            items.push(*item);
+            weights.push(*drop_weight);
         }
 
         Self {
-            distribution: WeightedIndex::new(weights).expect("Invalid weights for item drops"),
             rng: RwLock::new(make_rng()),
+            items,
+            distribution: WeightedIndex::new(weights).expect("Invalid weights for item drops"),
         }
     }
 

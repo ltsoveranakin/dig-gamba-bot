@@ -1,5 +1,5 @@
 use crate::commands::{CommandContext, DigCommandError};
-use crate::db::schema::item::generator::ITEM_GENERATOR;
+use crate::db::schema::item::locations::DiggingLocation;
 use crate::db::schema::item::{Item, ItemValue, ITEM_TABLE, MAX_RARITY_ADDITIONAL_MUL, RARITY_POW};
 use crate::db::schema::users::{UserData, USER_TABLE};
 use rand::RngExt;
@@ -31,9 +31,13 @@ impl InventoryItem {
     pub(crate) async fn create_new(ctx: &CommandContext<'_>) -> Result<Self, DigCommandError> {
         UserData::get_user(&ctx).await?;
 
-        let item_type = ITEM_GENERATOR.random_item();
+        let digging_location = DiggingLocation::get_location_from_channel(&ctx).await?;
 
-        let rarity_lin: f64 = ITEM_GENERATOR.rng_mut().random_range(0.0..1.0);
+        let item_generator = ctx.data().digging_locations.get(&digging_location).ok_or("No clue how this error happened but it did, congrats!\nSomehow this digging location isn't registered for the item generator even tho it is for a valid digging location.")?;
+
+        let item_type = item_generator.random_item();
+
+        let rarity_lin: f64 = item_generator.rng_mut().random_range(0.0..1.0);
         let rarity = rarity_lin.powf(RARITY_POW);
 
         let owner = RecordId::new(USER_TABLE, ctx.author().id.get().to_string());

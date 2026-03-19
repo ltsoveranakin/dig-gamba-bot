@@ -1,5 +1,6 @@
 pub(crate) mod generator;
 pub(crate) mod inventory_item;
+pub(crate) mod locations;
 pub(crate) mod rarity;
 
 use derive_enum_all_values::AllValues;
@@ -53,17 +54,6 @@ impl ItemValue for Item {
 }
 
 impl Item {
-    fn get_drop_weight(&self) -> usize {
-        match self {
-            Self::Garbage => 10,
-            Self::OldCoin => 8,
-            Self::BrokenTool => 5,
-            Self::Diamond => 1,
-            Self::Ruby => 1,
-            Self::MetalScraps => 8,
-        }
-    }
-
     pub(crate) fn get_description(&self) -> &str {
         match self {
             Self::Garbage => "Some garbage left behind",

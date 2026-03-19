@@ -1,4 +1,3 @@
-use crate::commands::digging::can_dig_in_channel;
 use crate::commands::{default_embed, default_reply, CommandContext, DigCommandError};
 use crate::db::schema::item::inventory_item::InventoryItem;
 use crate::db::schema::item::rarity::Rarity;
@@ -12,10 +11,6 @@ static DROP_TEXTS: [&str; 2] = [
 
 #[poise::command(slash_command, category = "digging")]
 pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
-    if !can_dig_in_channel(&ctx).await? {
-        return Ok(());
-    }
-
     let inventory_item = InventoryItem::create_new(&ctx).await?;
 
     let rarity = Rarity::from_float(inventory_item.rarity);
