@@ -4,6 +4,8 @@ use serenity::all::{ChannelType, CreateChannel};
 const DIGGING_CATEGORY_NAME: &str = "Digging";
 pub(crate) const THE_BEACH_CHANNEL_NAME: &str = "beach";
 
+/// Automatically sets up the required channels needed to use this bot
+
 #[poise::command(
     slash_command,
     category = "setup",

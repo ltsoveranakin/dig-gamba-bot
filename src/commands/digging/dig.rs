@@ -9,6 +9,9 @@ static DROP_TEXTS: [&str; 2] = [
     "It was hard work, but you found $article $rarity $item!",
 ];
 
+/// Digs at your current location
+///
+/// You can use /dig to dig up items in the current channel
 #[poise::command(slash_command, category = "digging")]
 pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
     let inventory_item = InventoryItem::create_new(&ctx).await?;

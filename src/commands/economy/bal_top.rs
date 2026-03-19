@@ -6,6 +6,7 @@ use poise::futures_util::stream;
 use poise::futures_util::stream::StreamExt;
 use surrealdb::types::SurrealValue;
 
+/// Gets the users with the highest balance in their inventory
 #[poise::command(slash_command, category = "economy", rename = "baltop")]
 pub(super) async fn bal_top(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
     let guild_id = ctx.guild_id().ok_or("Must be in server")?;

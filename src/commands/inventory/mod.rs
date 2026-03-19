@@ -21,18 +21,25 @@ impl CommandList for InventoryCommands {
 const INVENTORY_RETURN_LIMIT: u32 = 5;
 static EMOJI_NUMBERS: [&str; INVENTORY_RETURN_LIMIT as usize] = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
 
-#[derive(poise::ChoiceParameter)]
-enum SortMode {
-    ItemType,
-    Rarity,
-}
-
+/// Displays your inventory (by default) or another user's inventory if specified at a given page number
+///
+/// To display the first 5 items of your inventory, you can use /inventory
+///
+/// You can view other pages of your inventory with /inventory <page number>
+/// For example: viewing inventory page 3 cna be done with /inventory 3
+///
+/// The same applies for inventories of other users.
+/// You can view another user's inventory with /inventory <page number> default <user>
+///
+/// You can also sort the inventory in a few ways, such as Item type and Rarity
+/// To sort the inventory display you can use /inventory <page number> <sort mode>
+/// For example: viewing page 2 of your inventory sorted by item rarity can be done with /inventory 2 rarity
 #[poise::command(slash_command, category = "inventory")]
 async fn inventory(
     ctx: CommandContext<'_>,
     #[description = "The page number of the inventory to display"] page_number: Option<u32>,
-    #[description = "The user to display inventory of"] target_user: Option<User>,
     #[description = "The order to return the data"] sort_mode: Option<SortMode>,
+    #[description = "The user to display inventory of"] target_user: Option<User>,
 ) -> Result<(), DigCommandError> {
     let db = &ctx.data().db;
 
@@ -45,13 +52,19 @@ async fn inventory(
     let start = page_index * INVENTORY_RETURN_LIMIT;
 
     let order_by_text = if let Some(sort_mode) = sort_mode {
-        let sort_field = match sort_mode {
-            SortMode::Rarity => "rarity",
+        if matches!(sort_mode, SortMode::Default) {
+            String::new()
+        } else {
+            let sort_field = match sort_mode {
+                SortMode::Rarity => "rarity",
 
-            SortMode::ItemType => "item_type",
-        };
+                SortMode::Item => "item_type",
 
-        format!(" ORDER BY {} DESC", sort_field)
+                SortMode::Default => unreachable!(),
+            };
+
+            format!(" ORDER BY {} DESC", sort_field)
+        }
     } else {
         String::new()
     };
@@ -203,4 +216,14 @@ async fn inventory(
     }
 
     Ok(())
+}
+
+#[derive(poise::ChoiceParameter)]
+enum SortMode {
+    #[name = "item"]
+    Item,
+    #[name = "rarity"]
+    Rarity,
+    #[name = "default"]
+    Default,
 }

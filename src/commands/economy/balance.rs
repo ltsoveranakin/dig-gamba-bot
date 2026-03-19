@@ -2,6 +2,11 @@ use crate::commands::{default_reply_msg, CommandContext, DigCommandError};
 use crate::db::schema::users::UserData;
 use serenity::all::User;
 
+/// Gets your current balance (by default) or another users's balance if specified
+///
+/// You can use /balance to get your balance
+///
+/// You can use /balance <user> to get another user's balance
 #[poise::command(slash_command, category = "economy")]
 pub(super) async fn balance(
     ctx: CommandContext<'_>,

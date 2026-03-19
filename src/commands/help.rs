@@ -9,6 +9,12 @@ impl CommandList for HelpCommands {
     }
 }
 
+/// Gives help for all the commands of this bot
+///
+/// To show a list of commands you can run /help
+///
+/// To show help with a specific command you can run /help <command>
+/// For example: to get help with the inventory command you can run /help inventory
 #[poise::command(slash_command, category = "help")]
 async fn help(
     ctx: CommandContext<'_>,
@@ -21,14 +27,12 @@ async fn help(
         };
     }
 
-    let extra_text_at_bottom = "Type `/help <command>` for more info on a command";
-
     let config = HelpConfiguration {
         show_subcommands: true,
         show_context_menu_commands: true,
         ephemeral: true,
         include_description: true,
-        extra_text_at_bottom,
+        extra_text_at_bottom: "Type `/help <command>` for more information on a command",
         ..Default::default()
     };
 

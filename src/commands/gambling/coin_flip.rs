@@ -3,27 +3,14 @@ use crate::db::schema::users::UserData;
 use rand::RngExt;
 use std::fmt::{Display, Formatter};
 
-const MAX_COIN_FLIP_AMOUNT: u64 = 10_000;
-
-#[derive(poise::ChoiceParameter)]
-enum CoinFlipResult {
-    Heads,
-    Tails,
-}
-
-impl Display for CoinFlipResult {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let result_str = match self {
-            Self::Heads => "heads",
-
-            Self::Tails => "tails",
-        };
-
-        f.write_str(result_str)
-    }
-}
-
-#[poise::command(slash_command, category = "games")]
+/// Performs a coin flip with a specified amount to bet and an optional result to bet on
+///
+/// To bet $100 you can use /coinflip 100
+/// This will bet $100 on a random side
+///
+/// You can also specify which side to bet on, for example you can bet $20 on tails with
+/// /coinflip 20 tails
+#[poise::command(slash_command, category = "games", rename = "coinflip")]
 pub(super) async fn coin_flip(
     ctx: CommandContext<'_>,
     #[description = "The amount to bet in the coin flip"]
@@ -84,4 +71,24 @@ pub(super) async fn coin_flip(
     .await?;
 
     Ok(())
+}
+
+#[derive(poise::ChoiceParameter)]
+enum CoinFlipResult {
+    #[name = "heads"]
+    Heads,
+    #[name = "tails"]
+    Tails,
+}
+
+impl Display for CoinFlipResult {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let result_str = match self {
+            Self::Heads => "heads",
+
+            Self::Tails => "tails",
+        };
+
+        f.write_str(result_str)
+    }
 }
