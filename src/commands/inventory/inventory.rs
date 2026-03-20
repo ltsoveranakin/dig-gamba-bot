@@ -116,26 +116,37 @@ pub(super) async fn inventory(
         ));
     }
 
-    let components = vec![CreateActionRow::SelectMenu(
-        CreateSelectMenu::new("sell_select", CreateSelectMenuKind::String { options })
-            .placeholder("Sell items")
-            .min_values(1)
-            .max_values(5),
-    )];
+    let empty_inventory = fields.is_empty();
 
-    let embed = default_embed()
+    let mut embed = default_embed()
         .title(format!("{}'s Inventory", target_user.name))
         .thumbnail(target_user.face())
         .footer(CreateEmbedFooter::new(format!(
             "Page {} of {}",
             page_number,
             ((count + INVENTORY_RETURN_LIMIT) - 1) / INVENTORY_RETURN_LIMIT
-        )))
-        .fields(fields);
+        )));
 
-    let m = ctx
-        .send(default_reply().embed(embed).components(components))
-        .await?;
+    if !empty_inventory {
+        embed = embed
+            .description("Empty inventory, get to digging son!")
+            .fields(fields);
+    }
+
+    let mut create_reply = default_reply().embed(embed);
+
+    if empty_inventory {
+        let components = vec![CreateActionRow::SelectMenu(
+            CreateSelectMenu::new("sell_select", CreateSelectMenuKind::String { options })
+                .placeholder("Sell items")
+                .min_values(1)
+                .max_values(5),
+        )];
+
+        create_reply = create_reply.components(components);
+    }
+
+    let m = ctx.send(create_reply).await?;
 
     while let Some(mci) = m
         .message()
