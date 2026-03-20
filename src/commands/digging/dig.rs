@@ -1,8 +1,14 @@
-use crate::commands::{default_embed, default_reply, CommandContext, DigCommandError};
+use crate::commands::{
+    default_embed, default_reply, default_reply_msg, CommandContext, DigCommandError,
+};
 use crate::db::schema::item::inventory_item::InventoryItem;
+use crate::db::schema::item::locations::DiggingLocation;
 use crate::db::schema::item::rarity::Rarity;
 use rand::RngExt;
 use serenity::all::CreateAttachment;
+use surrealdb::types::Datetime;
+
+const DIG_COOLDOWN_TIME_SECS: i64 = 60;
 
 static DROP_TEXTS: [&str; 2] = [
     "After some digging you found $article $rarity $item!",
@@ -14,7 +20,44 @@ static DROP_TEXTS: [&str; 2] = [
 /// You can use /dig to dig up items in the current channel
 #[poise::command(slash_command, category = "digging")]
 pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
-    let inventory_item = InventoryItem::create_new(&ctx).await?;
+    let db = &ctx.data().db;
+    let digging_location = DiggingLocation::get_location_from_channel(ctx).await?;
+
+    let user_id = ctx.author().id.get() as i64;
+    let location_ord = digging_location as u16;
+
+    let last_dig_used_cur_loc: Option<Datetime> = db
+        .query("SELECT VALUE ldt FROM last_dug:[$id, $loc]")
+        .bind(("id", user_id))
+        .bind(("loc", location_ord))
+        .await?
+        .take(0)?;
+
+    let time_now = Datetime::now();
+
+    let next_allowed_dig_time = last_dig_used_cur_loc
+        .map_or(0, |last_dig_time| last_dig_time.timestamp())
+        + DIG_COOLDOWN_TIME_SECS;
+
+    if time_now.timestamp() < next_allowed_dig_time {
+        ctx.send(
+            default_reply_msg(format!(
+                "You cant dig here yet, try another location or here again <t:{}:R>",
+                next_allowed_dig_time,
+            ))
+            .ephemeral(true),
+        )
+        .await?;
+
+        return Ok(());
+    }
+
+    let inventory_item = InventoryItem::create_new(ctx, digging_location).await?;
+
+    db.query("UPSERT last_dug:[$id, $loc] SET ldt = time::now();")
+        .bind(("id", user_id))
+        .bind(("loc", location_ord))
+        .await?;
 
     let rarity = Rarity::from_float(inventory_item.rarity);
     let mut rarity_variant_str = rarity.to_string();

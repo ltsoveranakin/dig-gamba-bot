@@ -28,10 +28,11 @@ impl ItemValue for InventoryItem {
 }
 
 impl InventoryItem {
-    pub(crate) async fn create_new(ctx: &CommandContext<'_>) -> Result<Self, DigCommandError> {
-        UserData::get_user(&ctx).await?;
-
-        let digging_location = DiggingLocation::get_location_from_channel(&ctx).await?;
+    pub(crate) async fn create_new(
+        ctx: CommandContext<'_>,
+        digging_location: DiggingLocation,
+    ) -> Result<Self, DigCommandError> {
+        UserData::get_user(ctx).await?;
 
         let item_generator = ctx.data().digging_locations.get(&digging_location).ok_or("No clue how this error happened but it did, congrats!\nSomehow this digging location isn't registered for the item generator even tho it is for a valid digging location.")?;
 

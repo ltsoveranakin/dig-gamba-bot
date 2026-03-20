@@ -42,8 +42,8 @@ impl DiggingLocation {
         }
     }
 
-    pub(super) async fn get_location_from_channel(
-        ctx: &CommandContext<'_>,
+    pub(crate) async fn get_location_from_channel(
+        ctx: CommandContext<'_>,
     ) -> Result<DiggingLocation, DigCommandError> {
         let channel = ctx.guild_channel().await.ok_or("Must be in a server")?;
 
@@ -55,9 +55,9 @@ impl DiggingLocation {
                         channel.id
                     })
                 }) {
-                    format!("Try the <#{beach_channel_id}>, I heard it's a good place to start.")
+                    format!("Try the <#{beach_channel_id}>, I heard it's a good place to start out!")
                 } else {
-                    "I would recommend the beach to dig but I can't find the channel!\nHave an admin run `/setup`".to_string()
+                    "I would recommend the beach to dig, but I can't find the channel!\nHave an admin run `/setup`".to_string()
                 };
 
                 format!("You can't dig here!\n{advice_text}")

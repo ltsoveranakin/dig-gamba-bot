@@ -19,7 +19,7 @@ pub(super) async fn coin_flip(
     amount: u64,
     #[description = "The result to bet on"] result_bet_on: Option<CoinFlipResult>,
 ) -> serenity::Result<(), DigCommandError> {
-    let mut user = UserData::get_user(&ctx).await?;
+    let mut user = UserData::get_user(ctx).await?;
 
     if user.balance < amount {
         ctx.send(default_reply_msg(format!(

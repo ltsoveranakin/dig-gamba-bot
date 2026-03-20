@@ -19,6 +19,8 @@ struct Args {
     drop_users: bool,
     #[arg(long)]
     drop_items: bool,
+    #[arg(long)]
+    drop_last_dug: bool,
 }
 
 #[tokio::main]
@@ -50,6 +52,15 @@ async fn main() -> anyhow::Result<()> {
 
                 db.use_ns("dig_bot").use_db("slash_dig").await?;
 
+                db.query(
+                    "\
+                        DEFINE TABLE user SCHEMALESS;\
+                        DEFINE TABLE item SCHEMALESS;\
+                        DEFINE TABLE last_dug SCHEMALESS;\
+                    ",
+                )
+                .await?;
+
                 println!("Db set up");
 
                 if args.drop_users {
@@ -64,6 +75,13 @@ async fn main() -> anyhow::Result<()> {
                     db.query("DELETE item").await?;
                 }
 
+                if args.drop_last_dug {
+                    // Holay Molay
+                    println!("Dropping last_dug table");
+                    db.query("DELETE last_dug").await?;
+                }
+
+                println!("Bot ready");
                 Ok(Data::new(db))
             })
         })

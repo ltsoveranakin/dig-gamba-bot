@@ -2,7 +2,7 @@ use crate::commands::{default_reply_msg, CommandContext, DigCommandError};
 use crate::db::schema::users::UserData;
 use serenity::all::User;
 
-/// Gets your current balance (by default) or another users's balance if specified
+/// Gets your current balance (by default) or another user's balance if specified
 ///
 /// You can use /balance to get your balance
 ///
@@ -14,7 +14,7 @@ pub(super) async fn balance(
 ) -> Result<(), DigCommandError> {
     let target_user = target_user.as_ref().unwrap_or_else(|| ctx.author());
 
-    let user = UserData::get_user_by_id(&ctx, target_user.id).await?;
+    let user = UserData::get_user_by_id(ctx, target_user.id).await?;
 
     ctx.send(default_reply_msg(format!(
         "{}'s balance is: {}",

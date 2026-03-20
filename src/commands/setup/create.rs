@@ -4,7 +4,7 @@ use crate::db::schema::users::UserData;
 /// Creates your user profile
 #[poise::command(slash_command, category = "setup", ephemeral)]
 pub(super) async fn create(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
-    let user = UserData::create_user(&ctx).await?;
+    let user = UserData::create_user(ctx).await?;
 
     ctx.send(default_reply_msg(format!(
         "Your user profile has been created! Your starting balance is: {}",

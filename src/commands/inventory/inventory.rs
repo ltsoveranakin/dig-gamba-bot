@@ -145,7 +145,7 @@ pub(super) async fn inventory(
         .timeout(Duration::from_secs(60))
         .await
     {
-        let mut user = UserData::get_user(&ctx).await?;
+        let mut user = UserData::get_user(ctx).await?;
 
         let items: Vec<InventoryItem> = match mci.data.kind {
             ComponentInteractionDataKind::StringSelect { ref values } => db
@@ -191,7 +191,7 @@ pub(super) async fn inventory(
 
         let user_balance = user.balance;
 
-        db.update::<Option<UserData>>(UserData::user_resource(&ctx))
+        db.update::<Option<UserData>>(UserData::user_resource(ctx))
             .content(user)
             .await?;
 

@@ -1,6 +1,5 @@
 use crate::commands::{CommandContext, DigCommandError};
 use serenity::all::UserId;
-
 use surrealdb::types::{RecordId, SurrealValue};
 
 pub(crate) const USER_TABLE: &str = "user";
@@ -21,42 +20,33 @@ impl Default for UserData {
 }
 
 impl UserData {
-    pub(crate) async fn get_user(ctx: &CommandContext<'_>) -> Result<Self, DigCommandError> {
+    pub(crate) async fn get_user(ctx: CommandContext<'_>) -> Result<Self, DigCommandError> {
         Self::get_user_by_id(ctx, ctx.author().id).await
     }
 
-    // pub(crate) async fn get_user_by_serenity_user(
-    //     ctx: &CommandContext<'_>,
-    //     user: Option<User>,
-    // ) -> Result<Self, DigCommandError> {
-    //     Self::get_user_by_id(ctx, user.map(|user| user.id))
-    // }
-
     pub(crate) async fn get_user_by_id(
-        ctx: &CommandContext<'_>,
+        ctx: CommandContext<'_>,
         user_id: UserId,
     ) -> Result<Self, DigCommandError> {
-        if let Ok(user) = ctx
+        let user = match ctx
             .data()
             .db
             .select::<Option<Self>>(Self::user_resource_by_id(user_id))
-            .await
+            .await?
         {
-            if let Some(user) = user {
-                Ok(user)
-            } else {
-                Self::profile_not_created_error()
-            }
-        } else {
-            Self::profile_not_created_error()
-        }
+            Some(user) => user,
+
+            None => Self::create_user(ctx).await?,
+        };
+
+        Ok(user)
     }
 
     fn profile_not_created_error() -> Result<Self, DigCommandError> {
         Err("User profile not yet created, please setup your user with `/create`".into())
     }
 
-    pub(crate) async fn create_user(ctx: &CommandContext<'_>) -> Result<Self, DigCommandError> {
+    pub(crate) async fn create_user(ctx: CommandContext<'_>) -> Result<Self, DigCommandError> {
         let user = ctx
             .data()
             .db
@@ -67,7 +57,7 @@ impl UserData {
         Ok(user.unwrap())
     }
 
-    pub(crate) fn user_resource(ctx: &CommandContext) -> (&'static str, i64) {
+    pub(crate) fn user_resource(ctx: CommandContext) -> (&'static str, i64) {
         Self::user_resource_by_id(ctx.author().id)
     }
 
