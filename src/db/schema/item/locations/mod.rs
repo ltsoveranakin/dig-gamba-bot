@@ -44,25 +44,11 @@ impl DiggingLocation {
 
     pub(crate) async fn get_location_from_channel(
         ctx: CommandContext<'_>,
-    ) -> Result<DiggingLocation, DigCommandError> {
+    ) -> Result<Option<DiggingLocation>, DigCommandError> {
         let channel = ctx.guild_channel().await.ok_or("Must be in a server")?;
 
-        let location = DIGGING_LOCATIONS
-            .get(&*channel.name)
-            .ok_or_else(|| {
-                let advice_text = if let Some(beach_channel_id) = ctx.guild().expect("Checked if in server").channels.values().find_map(|channel| {
-                    (channel.name == Self::Beach.get_channel_name()).then(|| {
-                        channel.id
-                    })
-                }) {
-                    format!("Try the <#{beach_channel_id}>, I heard it's a good place to start out!")
-                } else {
-                    "I would recommend the beach to dig, but I can't find the channel!\nHave an admin run `/setup`".to_string()
-                };
+        let location = DIGGING_LOCATIONS.get(&*channel.name);
 
-                format!("You can't dig here!\n{advice_text}")
-            })?;
-
-        Ok(*location)
+        Ok(location.copied())
     }
 }

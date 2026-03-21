@@ -127,11 +127,11 @@ pub(super) async fn inventory(
             ((count + INVENTORY_RETURN_LIMIT) - 1) / INVENTORY_RETURN_LIMIT
         )));
 
-    if !empty_inventory {
-        embed = embed
-            .description("Empty inventory, get to digging son!")
-            .fields(fields);
-    }
+    embed = if empty_inventory {
+        embed.description("Empty inventory, get to digging son!")
+    } else {
+        embed.fields(fields)
+    };
 
     let mut create_reply = default_reply().embed(embed);
 

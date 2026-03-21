@@ -4,6 +4,8 @@ use surrealdb::types::{RecordId, SurrealValue};
 
 pub(crate) const USER_TABLE: &str = "user";
 
+type UserResource = (&'static str, i64);
+
 #[derive(SurrealValue, Debug)]
 pub(crate) struct UserData {
     pub(crate) balance: u64,
@@ -36,7 +38,7 @@ impl UserData {
         {
             Some(user) => user,
 
-            None => Self::create_user(ctx).await?,
+            None => Self::create_user_by_id(ctx, user_id).await?,
         };
 
         Ok(user)
@@ -57,11 +59,25 @@ impl UserData {
         Ok(user.unwrap())
     }
 
-    pub(crate) fn user_resource(ctx: CommandContext) -> (&'static str, i64) {
+    pub(crate) async fn create_user_by_id(
+        ctx: CommandContext<'_>,
+        user_id: UserId,
+    ) -> Result<Self, DigCommandError> {
+        let user = ctx
+            .data()
+            .db
+            .create(Self::user_resource_by_id(user_id))
+            .content(UserData::default())
+            .await?;
+
+        Ok(user.unwrap())
+    }
+
+    pub(crate) fn user_resource(ctx: CommandContext) -> UserResource {
         Self::user_resource_by_id(ctx.author().id)
     }
 
-    fn user_resource_by_id(user_id: UserId) -> (&'static str, i64) {
+    fn user_resource_by_id(user_id: UserId) -> UserResource {
         (USER_TABLE, user_id.get() as i64)
     }
 }

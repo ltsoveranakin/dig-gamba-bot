@@ -21,7 +21,28 @@ static DROP_TEXTS: [&str; 2] = [
 #[poise::command(slash_command, category = "digging")]
 pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> {
     let db = &ctx.data().db;
-    let digging_location = DiggingLocation::get_location_from_channel(ctx).await?;
+
+    let Some(digging_location) = DiggingLocation::get_location_from_channel(ctx).await? else {
+        let advice_text = if let Some(beach_channel_id) = ctx
+            .guild()
+            .expect("Checked if in server")
+            .channels
+            .values()
+            .find_map(|channel| {
+                (channel.name == DiggingLocation::Beach.get_channel_name()).then(|| channel.id)
+            }) {
+            format!("Try the <#{beach_channel_id}>, I heard it's a good place to start out!")
+        } else {
+            "I would recommend the beach to dig, but I can't find the channel!\nHave an admin run `/setup`".to_string()
+        };
+
+        ctx.send(default_reply_msg(format!(
+            "You can't dig here!\n{advice_text}"
+        )))
+        .await?;
+
+        return Ok(());
+    };
 
     let user_id = ctx.author().id.get() as i64;
     let location_ord = digging_location as u16;

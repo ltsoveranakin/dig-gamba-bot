@@ -14,7 +14,7 @@ pub(super) async fn bal_top(ctx: CommandContext<'_>) -> Result<(), DigCommandErr
     let mut results = ctx
         .data()
         .db
-        .query("SELECT * FROM user ORDER BY balance ASC LIMIT 10")
+        .query("SELECT * FROM user ORDER BY balance DESC LIMIT 10")
         .await?;
 
     let users: Vec<UserData> = results.take(0)?;
