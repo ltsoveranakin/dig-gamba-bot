@@ -14,6 +14,7 @@ use crate::commands::setup::SetupCommands;
 use crate::Data;
 use poise::CreateReply;
 use serenity::all::{Color, CreateEmbed};
+use std::fmt::{Display, Formatter};
 use std::iter::Extend;
 
 pub(crate) type CommandContext<'a> = poise::Context<'a, Data, DigCommandError>;
@@ -54,4 +55,39 @@ fn default_reply() -> CreateReply {
 
 fn default_reply_msg(message: impl Into<String>) -> CreateReply {
     default_reply().embed(default_embed().description(message))
+}
+
+enum TimeVariant {
+    Rel,
+}
+
+impl Display for TimeVariant {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::Rel => "R",
+        };
+
+        f.write_str(s)
+    }
+}
+
+struct CreateTime {
+    secs: i64,
+    /// Unused currently
+    variant: TimeVariant,
+}
+
+impl CreateTime {
+    fn new(secs: i64) -> Self {
+        Self {
+            secs,
+            variant: TimeVariant::Rel,
+        }
+    }
+}
+
+impl Display for CreateTime {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<t:{}:{}>", self.secs, self.variant)
+    }
 }

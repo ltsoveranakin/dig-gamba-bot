@@ -1,5 +1,5 @@
 use crate::commands::{
-    default_embed, default_reply, default_reply_msg, CommandContext, DigCommandError,
+    default_embed, default_reply, default_reply_msg, CommandContext, CreateTime, DigCommandError,
 };
 use crate::db::schema::item::inventory_item::InventoryItem;
 use crate::db::schema::item::locations::DiggingLocation;
@@ -63,8 +63,8 @@ pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> 
     if time_now.timestamp() < next_allowed_dig_time {
         ctx.send(
             default_reply_msg(format!(
-                "You cant dig here yet, try another location or here again <t:{}:R>",
-                next_allowed_dig_time,
+                "You cant dig here yet, try another location or here again {}",
+                CreateTime::new(next_allowed_dig_time),
             ))
             .ephemeral(true),
         )

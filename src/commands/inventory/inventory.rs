@@ -135,12 +135,14 @@ pub(super) async fn inventory(
 
     let mut create_reply = default_reply().embed(embed);
 
-    if empty_inventory {
+    if !empty_inventory {
+        let options_len = options.len();
+
         let components = vec![CreateActionRow::SelectMenu(
             CreateSelectMenu::new("sell_select", CreateSelectMenuKind::String { options })
                 .placeholder("Sell items")
                 .min_values(1)
-                .max_values(5),
+                .max_values(options_len.min(5) as u8),
         )];
 
         create_reply = create_reply.components(components);

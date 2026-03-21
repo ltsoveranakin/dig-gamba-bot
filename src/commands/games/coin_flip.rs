@@ -1,15 +1,23 @@
-use crate::commands::{default_reply_msg, CommandContext, DigCommandError};
+use crate::commands::{
+    default_embed, default_reply_msg, CommandContext, CreateTime, DigCommandError,
+};
 use crate::db::schema::users::UserData;
+use poise::CreateReply;
 use rand::RngExt;
+use serenity::all::{Mentionable, User};
 use std::fmt::{Display, Formatter};
+use std::time::Duration;
+use surrealdb::types::Datetime;
 
-/// Performs a coin flip with a specified amount to bet and an optional result to bet on
+const OPPONENT_ACCEPT_TIMEOUT: i64 = 60;
+
+/// Performs a coin flip with a specified amount to bet and an optional user to bet against
 ///
 /// To bet $100 you can use /coinflip 100
-/// This will bet $100 on a random side
+/// This will bet $100 against the bot
 ///
-/// You can also specify which side to bet on, for example you can bet $20 on tails with
-/// /coinflip 20 tails
+/// You can also specify which user to bet against, for example you can bet $20 against a user with
+/// /coinflip 20 <user>
 #[poise::command(slash_command, category = "games", rename = "coinflip")]
 pub(super) async fn coin_flip(
     ctx: CommandContext<'_>,
@@ -17,48 +25,76 @@ pub(super) async fn coin_flip(
     #[min = 0]
     #[max = 10_000]
     amount: u64,
-    #[description = "The result to bet on"] result_bet_on: Option<CoinFlipResult>,
+    #[description = "The target user to bet against"] opponent: Option<User>,
 ) -> serenity::Result<(), DigCommandError> {
-    let mut user = UserData::get_user(ctx).await?;
+    let mut command_user_data = UserData::get_user(ctx).await?;
 
-    if user.balance < amount {
+    if command_user_data.balance < amount {
         ctx.send(default_reply_msg(format!(
             "You don't have enough balance to cover this! Your balance is: {}",
-            user.balance
+            command_user_data.balance
         )))
         .await?;
 
         return Ok(());
     }
 
-    let player_bet;
-    let is_heads;
+    if let Some(opp) = opponent {
+        if &opp == ctx.author() {
+            ctx.send(default_reply_msg(
+                "C'mon man you can't bet against yourself :(\nI almost didn't catch this bug lol",
+            ))
+            .await?;
 
-    {
-        let mut rng = ctx.data().rng_mut();
+            return Ok(());
+        }
 
-        player_bet = result_bet_on.unwrap_or_else(|| {
-            if rng.random() {
-                CoinFlipResult::Heads
-            } else {
-                CoinFlipResult::Tails
-            }
-        });
+        let cmd_user_mention = ctx.author().mention();
+        let opp_mention = opp.mention();
 
-        is_heads = rng.random();
+        let secs_now = Datetime::now().timestamp();
+
+        let m = ctx
+            .send(
+                CreateReply::default()
+                    .content(opp_mention.to_string())
+                    .embed(default_embed().title("Coin Flip").description(format!(
+                        "\
+                        {cmd_user_mention} would like to coinflip ${amount} against {opp_mention}.\
+                        They may accept before the timer ends ({})\
+                    ",
+                        CreateTime::new(secs_now + OPPONENT_ACCEPT_TIMEOUT)
+                    ))),
+            )
+            .await?;
+
+        let Some(mci) = m
+            .message()
+            .await?
+            .await_component_interaction(&ctx.serenity_context().shard)
+            .author_id(opp.id)
+            .timeout(Duration::from_secs(OPPONENT_ACCEPT_TIMEOUT as u64))
+            .await
+        else {
+            m.edit(
+                ctx,
+                default_reply_msg(format!("{opp_mention} did not respond in time")),
+            )
+            .await?;
+
+            return Ok(());
+        };
+
+        ctx.send(default_reply_msg("opponent responded")).await?;
+        // Err("Not yet supported!")?
     }
 
-    ctx.send(default_reply_msg(format!(
-        "You bet {amount} on {player_bet}"
-    )))
-    .await?;
-
-    let end_game_text = if is_heads && matches!(player_bet, CoinFlipResult::Heads) {
-        user.balance += amount;
+    let end_game_text = if ctx.data().rng_mut().random() {
+        command_user_data.balance += amount;
 
         "You won the coin flip and just got $amt!\nYour balance is now $bal"
     } else {
-        user.balance -= amount;
+        command_user_data.balance -= amount;
 
         "You lost the coin flip and $amt :(\nYour balance is now $bal"
     };
@@ -66,7 +102,10 @@ pub(super) async fn coin_flip(
     ctx.send(default_reply_msg(
         end_game_text
             .replace("$amt", &format!("${}", &amount.to_string()))
-            .replace("$bal", &format!("${}", user.balance.to_string())),
+            .replace(
+                "$bal",
+                &format!("${}", command_user_data.balance.to_string()),
+            ),
     ))
     .await?;
 
