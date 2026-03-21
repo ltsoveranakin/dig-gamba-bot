@@ -5,11 +5,14 @@ use rand::make_rng;
 use rand::prelude::{Distribution, SmallRng};
 use std::sync::{RwLock, RwLockWriteGuard};
 
-// pub(crate) static ITEM_GENERATOR: LazyLock<ItemGenerator> = LazyLock::new(|| ItemGenerator::new());
+pub(crate) struct GeneratorItem {
+    pub(crate) item: Item,
+    pub(crate) weight: u32,
+}
 
 pub(crate) struct ItemGenerator {
     rng: RwLock<SmallRng>,
-    items: Vec<Item>,
+    pub(crate) items: Vec<GeneratorItem>,
     distribution: WeightedIndex<u32>,
 }
 
@@ -21,10 +24,14 @@ impl ItemGenerator {
         let mut weights = Vec::with_capacity(drop_pool.len());
 
         for (item, drop_weight) in drop_pool {
-            debug_assert!(*drop_weight > 0);
+            let drop_weight = *drop_weight;
+            debug_assert!(drop_weight > 0);
 
-            items.push(*item);
-            weights.push(*drop_weight);
+            items.push(GeneratorItem {
+                item: *item,
+                weight: drop_weight,
+            });
+            weights.push(drop_weight);
         }
 
         Self {
@@ -37,7 +44,7 @@ impl ItemGenerator {
     pub(super) fn random_item(&self) -> Item {
         let item_index = self.distribution.sample(&mut self.rng_mut());
 
-        Item::all_values()[item_index]
+        self.items[item_index].item
     }
 
     pub(super) fn rng_mut(&self) -> RwLockWriteGuard<'_, SmallRng> {
