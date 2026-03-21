@@ -26,7 +26,11 @@ pub(super) async fn drop_pool(ctx: CommandContext<'_>) -> Result<(), DigCommandE
             |generator_item| {
                 (
                     generator_item.item.to_string(),
-                    format!("Drop weight: {}", generator_item.weight),
+                    format!(
+                        "Chance: {:.2}%",
+                        (generator_item.drop_weight as f32 / generator.total_drop_weight as f32)
+                            * 100.0
+                    ),
                     false,
                 )
             },
