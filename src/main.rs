@@ -39,24 +39,19 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let mut commands = AllCommands::get();
-    let mut command_name_strs = Vec::with_capacity(commands.len() + 1);
+    let mut command_name_strs: Vec<&'static str> = Vec::with_capacity(commands.len() + 1);
 
     command_name_strs.push("help");
 
-    command_name_strs.extend(
-        commands
-            .iter()
-            .map(|command| {
-              let str: &'static str = command.name.clone().leak();
+    for command in &commands {
+        let str = command.name.clone().leak();
 
-                str
-            })
-            .collect(),
-    );
-
-    commands.push_front(help_command());
+        command_name_strs.push(str);
+    }
 
     COMMAND_NAMES.set(command_name_strs).expect("Command name list to not be set");
+
+    commands.push_front(help_command());
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {

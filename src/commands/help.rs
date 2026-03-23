@@ -41,7 +41,7 @@ struct CommandName {
 }
 
 impl CommandName {
-    fn get_names() -> &'static Vec<&'_ str> {
+    fn get_names() -> &'static Vec<&'static str> {
         COMMAND_NAMES
             .get().expect("Command names to be set")
     }
@@ -52,7 +52,7 @@ impl ChoiceParameter for CommandName {
         Self::get_names()
             .iter()
             .map(|command_name| CommandParameterChoice {
-                name: command_name.into_string(),
+                name: command_name.to_string(),
                 localizations: HashMap::new(),
                 __non_exhaustive: (),
             })
