@@ -7,8 +7,6 @@ use derive_enum_all_values::AllValues;
 use std::fmt::{Display, Formatter};
 use surrealdb::types::SurrealValue;
 
-const RARITY_POW: f64 = 2.5;
-const MAX_RARITY_ADDITIONAL_MUL: f64 = 10.0;
 pub(crate) const ITEM_TABLE: &str = "item";
 
 pub(crate) trait ItemValue {

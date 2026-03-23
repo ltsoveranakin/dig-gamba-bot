@@ -2,7 +2,8 @@ mod commands;
 mod data;
 mod db;
 
-use crate::commands::{AllCommands, CommandList};
+use crate::commands::help::help_command;
+use crate::commands::{AllCommands, CommandList, COMMAND_NAMES};
 use crate::data::Data;
 use anyhow::Context;
 use clap::Parser;
@@ -37,9 +38,29 @@ async fn main() -> anyhow::Result<()> {
         env::var("bot_token").context("token not set")?
     };
 
+    let mut commands = AllCommands::get();
+    let mut command_name_strs = Vec::with_capacity(commands.len() + 1);
+
+    command_name_strs.push("help");
+
+    command_name_strs.extend(
+        commands
+            .iter()
+            .map(|command| {
+              let str: &'static str = command.name.clone().leak();
+
+                str
+            })
+            .collect(),
+    );
+
+    commands.push_front(help_command());
+
+    COMMAND_NAMES.set(command_name_strs).expect("Command name list to not be set");
+
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: AllCommands::get(),
+            commands: commands.into_iter().collect(),
             ..Default::default()
         })
         .setup(move |ctx, _ready, framework| {

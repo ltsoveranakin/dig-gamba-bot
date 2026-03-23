@@ -1,42 +1,47 @@
 mod digging;
 mod economy;
 mod games;
-mod help;
+pub(super) mod help;
 mod inventory;
 mod setup;
 
 use crate::commands::digging::DiggingCommands;
 use crate::commands::economy::EconomyCommands;
 use crate::commands::games::GameCommands;
-use crate::commands::help::HelpCommands;
 use crate::commands::inventory::InventoryCommands;
 use crate::commands::setup::SetupCommands;
 use crate::Data;
 use poise::CreateReply;
 use serenity::all::{Color, CreateEmbed};
+use std::collections::VecDeque;
 use std::fmt::{Display, Formatter};
 use std::iter::Extend;
+use std::sync::OnceLock;
+
+// Using no rwlock on the vec here since we need a &str with a static lifetime for the help command.
+// Great work poise making this bullshit need unsafe rust!!!
+pub(super) static COMMAND_NAMES: OnceLock<Vec<&'static str>> = OnceLock::new();
 
 pub(crate) type CommandContext<'a> = poise::Context<'a, Data, DigCommandError>;
 pub(crate) type DigCommandError = Box<dyn std::error::Error + Send + Sync>;
+type DigCommand = poise::Command<Data, DigCommandError>;
+type CommandVec = Vec<DigCommand>;
+type CommandVecDeque = VecDeque<DigCommand>;
 
-type CommandVec = Vec<poise::Command<Data, DigCommandError>>;
-
-pub(super) trait CommandList {
-    fn get() -> CommandVec;
+pub(super) trait CommandList<CV = CommandVec> {
+    fn get() -> CV;
 }
 
 pub(super) struct AllCommands;
 
-impl CommandList for AllCommands {
-    fn get() -> CommandVec {
+impl CommandList<CommandVecDeque> for AllCommands {
+    fn get() -> CommandVecDeque {
         let command_lists = vec![
             InventoryCommands::get(),
             GameCommands::get(),
             DiggingCommands::get(),
             SetupCommands::get(),
             EconomyCommands::get(),
-            HelpCommands::get(),
         ];
 
         command_lists.into_iter().flatten().collect()

@@ -1,9 +1,12 @@
 use crate::commands::{CommandContext, DigCommandError};
 use crate::db::schema::item::locations::DiggingLocation;
-use crate::db::schema::item::{Item, ItemValue, ITEM_TABLE, MAX_RARITY_ADDITIONAL_MUL, RARITY_POW};
+use crate::db::schema::item::{Item, ItemValue, ITEM_TABLE};
 use crate::db::schema::users::{UserData, USER_TABLE};
 use rand::RngExt;
 use surrealdb::types::{RecordId, SurrealValue};
+
+const RARITY_POW: f64 = 2.5;
+const MAX_RARITY_ADDITIONAL_MUL: f64 = 10.0;
 
 #[derive(SurrealValue)]
 pub(crate) struct InventoryItem {
