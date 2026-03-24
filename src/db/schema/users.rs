@@ -1,5 +1,5 @@
 use crate::commands::{CommandContext, DigCommandError};
-use serenity::all::UserId;
+use serenity::all::{UserId};
 use surrealdb::types::{RecordId, SurrealValue};
 
 pub(crate) const USER_TABLE: &str = "user";
@@ -71,6 +71,14 @@ impl UserData {
             .await?;
 
         Ok(user.unwrap())
+    }
+
+    pub(crate) async fn update_user<'a>(self, ctx: CommandContext<'a>) -> Result<UserData, DigCommandError> {
+        let user = ctx.data().db.update(self.id.clone().unwrap()).content(self).await?;
+
+       let user =  user.ok_or("Failed to update user data")?;
+
+        Ok(user)
     }
 
     pub(crate) fn user_resource(ctx: CommandContext) -> UserResource {

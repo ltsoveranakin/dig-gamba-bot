@@ -79,7 +79,7 @@ pub(super) async fn inventory(
     let count = results.take::<Option<u32>>(1)?.unwrap_or(0);
 
     if items.is_empty() {
-        ctx.send(default_reply_msg("Invalid page number provided!"))
+        ctx.send(default_reply_msg("Inventory is empty"))
             .await?;
 
         return Ok(());
