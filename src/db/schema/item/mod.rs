@@ -5,6 +5,7 @@ pub(crate) mod rarity;
 
 use derive_enum_all_values::AllValues;
 use std::fmt::{Display, Formatter};
+use poise::ChoiceParameter;
 use surrealdb::types::SurrealValue;
 
 pub(crate) const ITEM_TABLE: &str = "item";
@@ -25,16 +26,17 @@ pub(crate) enum Item {
 
 impl Display for Item {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let s = match self {
-            Self::Garbage => "Garbage",
-            Self::OldCoin => "Old Coin",
-            Self::BrokenTool => "Broken Tool",
-            Self::Diamond => "Diamond",
-            Self::Ruby => "Ruby",
-            Self::MetalScraps => "Metal Scraps",
-        };
+        let mut string_buf = String::with_capacity(self.name().len());
 
-        f.write_str(s)
+        for ( i, c) in self.name().chars().enumerate() {
+            if c.is_ascii_uppercase() && i > 0 {
+                string_buf.push(' ');
+            }
+
+            string_buf.push(c);
+        }
+
+        f.write_str(&string_buf)
     }
 }
 
@@ -63,12 +65,9 @@ impl Item {
         }
     }
 
-    fn get_asset_name(&self) -> &str {
+    fn get_asset_name(&self) -> String {
         match self {
-            Self::Garbage => "garbage",
-            Self::MetalScraps | Self::Ruby | Self::Diamond | Self::BrokenTool | Self::OldCoin => {
-                "missing_texture"
-            }
+            Self::Garbage | Self::OldCoin | Self::Diamond | Self::Ruby | Self::BrokenTool | Self::MetalScraps=> self.to_string().replace(' ', "_"),
         }
     }
 
