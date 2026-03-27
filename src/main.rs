@@ -5,12 +5,11 @@ mod db;
 use crate::commands::help::help_command;
 use crate::commands::{AllCommands, CommandList, COMMAND_NAMES};
 use crate::data::Data;
+use crate::db::setup_db;
 use anyhow::Context;
 use clap::Parser;
 use poise::serenity_prelude::*;
 use std::env;
-use surrealdb::engine::local::SurrealKv;
-use surrealdb::Surreal;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -49,12 +48,15 @@ async fn main() -> anyhow::Result<()> {
         command_name_strs.push(str);
     }
 
-    COMMAND_NAMES.set(command_name_strs).expect("Command name list to not be set");
+    COMMAND_NAMES
+        .set(command_name_strs)
+        .expect("Command name list to not be set");
 
     commands.push_front(help_command());
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
+            owners: vec![UserId::new(846173524469219358)].into_iter().collect(),
             commands: commands.into_iter().collect(),
             ..Default::default()
         })
@@ -64,18 +66,7 @@ async fn main() -> anyhow::Result<()> {
 
                 println!("commands registered");
 
-                let db = Surreal::new::<SurrealKv>("data/dig_bot.db").await?;
-
-                db.use_ns("dig_bot").use_db("slash_dig").await?;
-
-                db.query(
-                    "\
-                        DEFINE TABLE user SCHEMALESS;\
-                        DEFINE TABLE item SCHEMALESS;\
-                        DEFINE TABLE last_dug SCHEMALESS;\
-                    ",
-                )
-                .await?;
+                let db = setup_db().await?;
 
                 println!("Db set up");
 

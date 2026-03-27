@@ -1,5 +1,5 @@
 use crate::commands::{default_embed, default_reply, CommandContext, DigCommandError};
-use crate::db::schema::item::{Item, ItemValue};
+use crate::db::schema::item::{Item};
 use serenity::all::{CreateAttachment, CreateEmbedAuthor};
 
 /// Gives information on a specified item

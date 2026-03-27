@@ -1,3 +1,5 @@
+mod channel_based_enum;
+mod dev;
 mod digging;
 mod economy;
 mod games;
@@ -17,6 +19,7 @@ use std::collections::VecDeque;
 use std::fmt::{Display, Formatter};
 use std::iter::Extend;
 use std::sync::OnceLock;
+use crate::commands::dev::DevCommands;
 
 // Using no rwlock on the vec here since we need a &str with a static lifetime for the help command.
 // Great work poise making this bullshit need unsafe rust!!!
@@ -42,6 +45,7 @@ impl CommandList<CommandVecDeque> for AllCommands {
             DiggingCommands::get(),
             SetupCommands::get(),
             EconomyCommands::get(),
+            DevCommands::get(),
         ];
 
         command_lists.into_iter().flatten().collect()

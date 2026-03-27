@@ -44,10 +44,6 @@ impl UserData {
         Ok(user)
     }
 
-    fn profile_not_created_error() -> Result<Self, DigCommandError> {
-        Err("User profile not yet created, please setup your user with `/create`".into())
-    }
-
     pub(crate) async fn create_user(ctx: CommandContext<'_>) -> Result<Self, DigCommandError> {
         let user = ctx
             .data()

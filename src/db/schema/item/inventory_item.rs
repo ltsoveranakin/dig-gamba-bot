@@ -1,6 +1,6 @@
 use crate::commands::{CommandContext, DigCommandError};
 use crate::db::schema::item::locations::DiggingLocation;
-use crate::db::schema::item::{Item, ItemValue, ITEM_TABLE};
+use crate::db::schema::item::{Item, ITEM_TABLE};
 use crate::db::schema::users::{UserData, USER_TABLE};
 use rand::RngExt;
 use surrealdb::types::{RecordId, SurrealValue};
@@ -10,24 +10,12 @@ const MAX_RARITY_ADDITIONAL_MUL: f64 = 10.0;
 
 #[derive(SurrealValue)]
 pub(crate) struct InventoryItem {
-    pub(crate) item_type: Item,
+    pub(crate) item_type: u16,
     /// Rarity value from 0 to 1
     /// The higher the rarity, the more the item is worth
     pub(crate) rarity: f64,
     pub(crate) owner: RecordId,
     pub(crate) id: Option<RecordId>,
-}
-
-impl ItemValue for InventoryItem {
-    fn get_item_value(&self) -> u64 {
-        let base_item_value = self.item_type.get_item_value();
-
-        let rarity_mul = self.rarity * MAX_RARITY_ADDITIONAL_MUL;
-
-        let item_value = base_item_value + (base_item_value * (rarity_mul as u64));
-
-        item_value
-    }
 }
 
 impl InventoryItem {
@@ -51,7 +39,7 @@ impl InventoryItem {
             .db
             .create(ITEM_TABLE)
             .content(InventoryItem {
-                item_type,
+                item_type: item_type.item_id(),
                 rarity,
                 owner,
                 id: None,
@@ -59,5 +47,16 @@ impl InventoryItem {
             .await?;
 
         Ok(item.unwrap())
+    }
+
+   pub(crate) fn calculate_item_value(&self) -> Option<u64> {
+        let item = Item::from_item_id(self.item_type)?;
+        let base_item_value = item.get_item_value();
+
+        let rarity_mul = self.rarity * MAX_RARITY_ADDITIONAL_MUL;
+
+        let item_value = base_item_value + (base_item_value * (rarity_mul as u64));
+
+        Some(item_value)
     }
 }

@@ -35,7 +35,7 @@ pub(super) async fn bal_top(ctx: CommandContext<'_>) -> Result<(), DigCommandErr
                 .into_number()
                 .expect("User ids stored as numbers")
                 .into_int()
-                .expect("Id is int") as u64;
+                .expect("ID is int") as u64;
 
             let user_balance = user.balance;
 

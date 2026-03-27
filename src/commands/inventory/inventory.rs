@@ -3,7 +3,7 @@ use crate::commands::{
 };
 use crate::db::schema::item::inventory_item::InventoryItem;
 use crate::db::schema::item::rarity::Rarity;
-use crate::db::schema::item::{ItemValue, ITEM_TABLE};
+use crate::db::schema::item::{ ITEM_TABLE};
 use crate::db::schema::users::{UserData, USER_TABLE};
 use serenity::all::{
     ComponentInteractionDataKind, CreateActionRow, CreateEmbedFooter, CreateInteractionResponse,
@@ -90,7 +90,7 @@ pub(super) async fn inventory(
 
     for inventory_item in items.into_iter() {
         let item_type_str = inventory_item.item_type.to_string();
-        let item_value = inventory_item.get_item_value();
+        let item_value = inventory_item.calculate_item_value().ok_or("Invalid item")?;
         let item_record_key_str = inventory_item.id.unwrap().key.to_sql();
         let rarity = inventory_item.rarity;
 
@@ -199,7 +199,7 @@ pub(super) async fn inventory(
         let plural_str = if items.len() != 1 { "s" } else { "" };
 
         for item in items {
-            user.balance += item.get_item_value();
+            user.balance += item.calculate_item_value().ok_or("Invalid item")?;
         }
 
         let user_balance = user.balance;

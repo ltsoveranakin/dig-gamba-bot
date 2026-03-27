@@ -4,6 +4,7 @@ use crate::commands::{
 use crate::db::schema::item::inventory_item::InventoryItem;
 use crate::db::schema::item::locations::DiggingLocation;
 use crate::db::schema::item::rarity::Rarity;
+use crate::db::schema::item::Item;
 use rand::RngExt;
 use serenity::all::CreateAttachment;
 use surrealdb::types::Datetime;
@@ -85,7 +86,7 @@ pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> 
 
     rarity_variant_str.make_ascii_lowercase();
 
-    let item_type = inventory_item.item_type;
+    let item_type = Item::from_item_id(inventory_item.item_type).ok_or("Invalid item id")?;
 
     let item_file_name = item_type.get_asset_file_name();
 
@@ -101,7 +102,7 @@ pub(super) async fn dig(ctx: CommandContext<'_>) -> Result<(), DigCommandError> 
             "a"
         }
     };
-    
+
     let drop_text = DROP_TEXTS[ctx.data().rng_mut().random_range(0..DROP_TEXTS.len())]
         .replace("$article", article)
         .replace("$rarity", &rarity.to_string().to_ascii_lowercase())
